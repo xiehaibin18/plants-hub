@@ -1,4 +1,4 @@
-# admin-serve
+# admin-server
 
 ## Project launch
 ```
