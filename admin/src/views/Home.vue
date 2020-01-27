@@ -51,103 +51,99 @@
       ></el-table-column>
     </el-table>
 
-    <el-pagination
-      :page-size="10"
-      layout="total, prev, pager, next, jumper"
-      :total="400">
-    </el-pagination>
+    <el-pagination :page-size="10" layout="total, prev, pager, next, jumper" :total="400"></el-pagination>
   </div>
 </template>
 
 <script>
-// import api from "../assets/api";
-// import axios from "axios";
+import api from "../assets/api";
+import axios from "axios";
 
 export default {
   data() {
     return {
       tableData: [
-        {
-          type: 0,
-          begin_time: 1572590180000,
-          ent_time: 1572590184000,
-          create_time: 1572590186000,
-          name: "谢海滨0"
-        },
-        {
-          type: 1,
-          begin_time: 1572590180000,
-          ent_time: 1572590184000,
-          create_time: 1572590186000,
-          name: "谢海滨1"
-        },
-        {
-          type: 0,
-          begin_time: 1572590180000,
-          ent_time: 1572590184000,
-          create_time: 1572590186000,
-          name: "谢海滨0"
-        },
-        {
-          type: 1,
-          begin_time: 1572590180000,
-          ent_time: 1572590184000,
-          create_time: 1572590186000,
-          name: "谢海滨1"
-        },
-        {
-          type: 0,
-          begin_time: 1572590180000,
-          ent_time: 1572590184000,
-          create_time: 1572590186000,
-          name: "谢海滨0"
-        },
-        {
-          type: 1,
-          begin_time: 1572590180000,
-          ent_time: 1572590184000,
-          create_time: 1572590186000,
-          name: "谢海滨1"
-        },
-        {
-          type: 0,
-          begin_time: 1572590180000,
-          ent_time: 1572590184000,
-          create_time: 1572590186000,
-          name: "谢海滨0"
-        },
-        {
-          type: 1,
-          begin_time: 1572590180000,
-          ent_time: 1572590184000,
-          create_time: 1572590186000,
-          name: "谢海滨1"
-        },
-        {
-          type: 0,
-          begin_time: 1572590180000,
-          ent_time: 1572590184000,
-          create_time: 1572590186000,
-          name: "谢海滨0"
-        },
-        {
-          type: 1,
-          begin_time: 1572590180000,
-          ent_time: 1572590184000,
-          create_time: 1572590186000,
-          name: "谢海滨1"
-        },
+        // {
+        //   type: 0,
+        //   begin_time: 1572590180000,
+        //   ent_time: 1572590184000,
+        //   create_time: 1572590186000,
+        //   name: "谢海滨0"
+        // },
+        // {
+        //   type: 1,
+        //   begin_time: 1572590180000,
+        //   ent_time: 1572590184000,
+        //   create_time: 1572590186000,
+        //   name: "谢海滨1"
+        // },
+        // {
+        //   type: 0,
+        //   begin_time: 1572590180000,
+        //   ent_time: 1572590184000,
+        //   create_time: 1572590186000,
+        //   name: "谢海滨0"
+        // },
+        // {
+        //   type: 1,
+        //   begin_time: 1572590180000,
+        //   ent_time: 1572590184000,
+        //   create_time: 1572590186000,
+        //   name: "谢海滨1"
+        // },
+        // {
+        //   type: 0,
+        //   begin_time: 1572590180000,
+        //   ent_time: 1572590184000,
+        //   create_time: 1572590186000,
+        //   name: "谢海滨0"
+        // },
+        // {
+        //   type: 1,
+        //   begin_time: 1572590180000,
+        //   ent_time: 1572590184000,
+        //   create_time: 1572590186000,
+        //   name: "谢海滨1"
+        // },
+        // {
+        //   type: 0,
+        //   begin_time: 1572590180000,
+        //   ent_time: 1572590184000,
+        //   create_time: 1572590186000,
+        //   name: "谢海滨0"
+        // },
+        // {
+        //   type: 1,
+        //   begin_time: 1572590180000,
+        //   ent_time: 1572590184000,
+        //   create_time: 1572590186000,
+        //   name: "谢海滨1"
+        // },
+        // {
+        //   type: 0,
+        //   begin_time: 1572590180000,
+        //   ent_time: 1572590184000,
+        //   create_time: 1572590186000,
+        //   name: "谢海滨0"
+        // },
+        // {
+        //   type: 1,
+        //   begin_time: 1572590180000,
+        //   ent_time: 1572590184000,
+        //   create_time: 1572590186000,
+        //   name: "谢海滨1"
+        // }
       ],
       colData: [
         { label: "#", type: "index", width: "55" },
-        { prop: "type", label: "报表类型", sortable: true },
-        { prop: "begin_time", label: "结算起算日" },
-        { prop: "ent_time", label: "结算结束日" },
-        { prop: "name", label: "操作人" },
-        { prop: "create_time", label: "操作时间" },
-        { prop: "create_time", label: "操作时间" },
-        { prop: "create_time", label: "操作时间" },
-        { type: "selection", width: "55" },
+        { prop: "personal_uid", label: "UID", sortable: true },
+        { prop: "personal_status", label: "状态" },
+        { prop: "personal_nickname", label: "昵称" },
+        { prop: "personal_avatar", label: "头像" },
+        { prop: "personal_favorite_plants_uid", label: "收藏植物" },
+        { prop: "personal_favorite_location_uid", label: "收藏位置" },
+        { prop: "personal_received_message_uid", label: "接收消息" },
+        { type: "selection", width: "55" }
       ],
       multipleSelection: [],
       search: ""
@@ -156,26 +152,41 @@ export default {
   methods: {
     handleSelectionChange(val) {
       this.multipleSelection = val;
-      console.log(this.multipleSelection);
+      // console.log(this.multipleSelection);
     },
     clickSearchBtn() {
-      console.log('11');
+      let self = this;
+      self.getTableDate();
+    },
+    getTableDate() {
+      let self = this;
+      axios({
+        url: api.getTable,
+        method: "post"
+      }).then(res => {
+        if (res.data) {
+          res = JSON.parse(res.data);
+          self.tableData = res;
+        }
+      });
     }
   },
-  mounted () {
+  mounted() {
+    let self = this;
+    self.getTableDate();
+  },
+  beforeRouteEnter(to, from, next) {
+    axios({
+      url: api.checkLogin,
+      method: "post"
+    }).then(res => {
+      if (res.data.message) {
+        next();
+      } else {
+        next({ path: "/" });
+      }
+    });
   }
-  // beforeRouteEnter(to, from, next) {
-  //   axios({
-  //     url: api.checkLogin,
-  //     method: "post"
-  //   }).then(res => {
-  //     if (res.data.message) {
-  //       next();
-  //     } else {
-  //       next({ path: "/" });
-  //     }
-  //   });
-  // }
 };
 </script>
 
@@ -185,7 +196,7 @@ body {
   padding: 0;
 }
 .el-input__suffix {
-  cursor: pointer
+  cursor: pointer;
 }
 </style>
 <style scoped>

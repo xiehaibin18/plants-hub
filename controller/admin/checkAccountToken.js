@@ -1,4 +1,4 @@
-const query = require('./mysql')
+const query = require('../mysql')
 
 module.exports = function (callback) {
   query(`SELECT account_token FROM admin WHERE account="admin"`)

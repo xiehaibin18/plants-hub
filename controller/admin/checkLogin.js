@@ -1,4 +1,4 @@
-const query = require('./mysql')
+const query = require('../mysql')
 const updataAccountToken = require('./updataAccountToken')
 
 module.exports = function (acc, pwd, callback) {

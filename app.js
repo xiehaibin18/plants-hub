@@ -3,7 +3,9 @@ const bodyParser = require('body-parser')
 const path = require('path')
 const session = require('express-session')
 
-const router = require('./router')
+const index = require('./router/index')
+const adminCheckLogin = require('./router/admin/CheckLogin')
+const adminHome = require('./router/admin/Home')
 
 const app = express()
 
@@ -29,7 +31,7 @@ app.use(session({
   saveUninitialized: true
 }))
 // 挂载路由
-app.use(router)
+app.use(index, adminCheckLogin, adminHome)
 
 app.listen(3000, function () {
   console.log('server is running, http://127.0.0.1:3000')
