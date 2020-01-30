@@ -1,26 +1,27 @@
 <template>
   <div class="home">
     <el-menu
-      default-active="1"
+      default-active="personal_info"
       class="home-menu"
-      background-color="#078a86"
-      text-color="#fff"
-      active-text-color="#ebe50c"
+      background-color="#0abab5"
+      text-color="#dadada"
+      active-text-color="#fff"
       mode="horizontal"
+      @select="menuSelect"
     >
-      <el-menu-item index="1">
+      <el-menu-item index="personal_info">
         <i class="el-icon-user"></i>
         <span slot="title">用户管理</span>
       </el-menu-item>
-      <el-menu-item index="2">
+      <el-menu-item index="plants_info">
         <i class="el-icon-apple"></i>
         <span slot="title">植物管理</span>
       </el-menu-item>
-      <el-menu-item index="3">
+      <el-menu-item index="location_info">
         <i class="el-icon-place"></i>
         <span slot="title">位置管理</span>
       </el-menu-item>
-      <el-menu-item index="4">
+      <el-menu-item index="message_info">
         <i class="el-icon-chat-dot-square"></i>
         <span slot="title">留言管理</span>
       </el-menu-item>
@@ -40,8 +41,8 @@
       highlight-current-row
     >
       <el-table-column
-        v-for="(col,index) in colData"
-        :key="index"
+        v-for="col in colData"
+        :key="col.prop"
         :prop="col.prop"
         :width="col.width"
         :label="col.label"
@@ -51,7 +52,12 @@
       ></el-table-column>
     </el-table>
 
-    <el-pagination :page-size="10" layout="total, prev, pager, next, jumper" :total="pagesTotal" @current-change="currentPageChange"></el-pagination>
+    <el-pagination
+      :page-size="10"
+      layout="total, prev, pager, next, jumper"
+      :total="pagesTotal"
+      @current-change="currentPageChange"
+    ></el-pagination>
   </div>
 </template>
 
@@ -70,13 +76,65 @@ export default {
         { prop: "personal_nickname", label: "昵称" },
         { type: "selection", width: "55" }
       ], // 表格设置
+      tableName: "personal_info", // 表名
       multipleSelection: [], // 选择项
       search: "", // 搜索内容
       pagesTotal: 0, // 条目总数
-      currentPage: 1, // 当前页数
+      currentPage: 1 // 当前页数
     };
   },
   methods: {
+    // 菜单选择
+    menuSelect(val) {
+      let self = this;
+      self.tableName = val;
+      switch (self.tableName) {
+        case "personal_info":
+          self.colData = [
+            { label: "#", type: "index", width: "55" },
+            { prop: "personal_uid", label: "UID", sortable: true },
+            { prop: "personal_status", label: "状态" },
+            { prop: "personal_nickname", label: "昵称" },
+            { type: "selection", width: "55" }
+          ];
+          break;
+        case "plants_info":
+          self.colData = [
+            { label: "#", type: "index", width: "55" },
+            { prop: "plants_uid", label: "UID", sortable: true },
+            { prop: "plants_name", label: "名称" },
+            { prop: "plants_introduction", label: "介绍" },
+            { prop: "plants_distributions_uid", label: "分布" },
+            { type: "selection", width: "55" }
+          ];
+          break;
+        case "location_info":
+          self.colData = [
+            { label: "#", type: "index", width: "55" },
+            { prop: "location_uid", label: "UID", sortable: true },
+            { prop: "location_name", label: "名称" },
+            { prop: "location_introduction", label: "介绍" },
+            { prop: "location_plants_uid", label: "分布" },
+            { type: "selection", width: "55" }
+          ];
+          break;
+        case "message_info":
+          self.colData = [
+            { label: "#", type: "index", width: "55" },
+            { prop: "message_uid", label: "UID", sortable: true },
+            { prop: "message_sender_uid", label: "留言账户" },
+            { prop: "message_receiver_uid", label: "接受账户" },
+            { prop: "message_plants_uid", label: "留言所处植物" },
+            { prop: "message_content", label: "留言内容" },
+            { prop: "message_date", label: "留言日期" },
+            { prop: "message_like", label: "点赞数", sortable: true },
+            { prop: "message_isshow", label: "是否显示" },
+            { type: "selection", width: "55" }
+          ];
+          break;
+      }
+      self.getTableDate();
+    },
     // 表格checkbox选择项改变
     handleSelectionChange(val) {
       this.multipleSelection = val;
@@ -90,7 +148,7 @@ export default {
     // 分页页数变化
     currentPageChange(val) {
       let self = this;
-      self.currentPage = val
+      self.currentPage = val;
       self.getTableDate();
     },
     // 获取表格数据
@@ -100,24 +158,33 @@ export default {
         url: api.getTable,
         method: "post",
         data: {
+          tableName: self.tableName,
           page: self.currentPage,
           search: self.search
         }
-      }).then(res => {
-        if (res.data) {
-          res.data.list.forEach(foo => {
-            if (foo.personal_status == 0) {
-              foo.personal_status = '正常'
-            } else if (foo.personal_status == 1) {
-              foo.personal_status = '封禁中'
-            } else {
-              foo.personal_status = '异常'
-            }
+      })
+        .then(res => {
+          if (res.data) {
+            res.data.list.forEach(foo => {
+              if (foo.personal_status == 0) {
+                foo.personal_status = "正常";
+              } else if (foo.personal_status == 1) {
+                foo.personal_status = "封禁中";
+              } else {
+                foo.personal_status = "异常";
+              }
+            });
+            self.tableData = res.data.list;
+            self.pagesTotal = res.data.count;
+          }
+        })
+        .catch(err => {
+          self.tableData = [];
+          self.$message({
+            message: `${err},获取表单数据失败`,
+            type: "warning"
           });
-          self.tableData = res.data.list;
-          self.pagesTotal = res.data.count;
-        }
-      });
+        });
     }
   },
   mounted() {
@@ -146,6 +213,30 @@ body {
 }
 .el-input__suffix {
   cursor: pointer;
+}
+.el-icon-user {
+  color: #dadada !important;
+}
+.is-active > .el-icon-user {
+  color: #fff !important;
+}
+.el-icon-apple {
+  color: #dadada !important;
+}
+.is-active > .el-icon-apple {
+  color: #fff !important;
+}
+.el-icon-place {
+  color: #dadada !important;
+}
+.is-active > .el-icon-place {
+  color: #fff !important;
+}
+.el-icon-chat-dot-square {
+  color: #dadada !important;
+}
+.is-active > .el-icon-chat-dot-square {
+  color: #fff !important;
 }
 </style>
 <style scoped>
