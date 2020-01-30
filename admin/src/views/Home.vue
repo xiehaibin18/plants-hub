@@ -26,7 +26,7 @@
       </el-menu-item>
     </el-menu>
 
-    <el-input v-model="input" placeholder="请输入内容" style="display: inline-block;width:200px">
+    <el-input v-model="search" placeholder="请输入内容" style="display: inline-block;width:200px">
       <i slot="suffix" class="el-input__icon el-icon-search" @click="clickSearchBtn"></i>
     </el-input>
     <!-- <el-button icon="el-icon-search" circle></el-button> -->
@@ -51,7 +51,7 @@
       ></el-table-column>
     </el-table>
 
-    <el-pagination :page-size="10" layout="total, prev, pager, next, jumper" :total="400"></el-pagination>
+    <el-pagination :page-size="10" layout="total, prev, pager, next, jumper" :total="pagesTotal" @current-change="currentPageChange"></el-pagination>
   </div>
 </template>
 
@@ -62,111 +62,60 @@ import axios from "axios";
 export default {
   data() {
     return {
-      tableData: [
-        // {
-        //   type: 0,
-        //   begin_time: 1572590180000,
-        //   ent_time: 1572590184000,
-        //   create_time: 1572590186000,
-        //   name: "谢海滨0"
-        // },
-        // {
-        //   type: 1,
-        //   begin_time: 1572590180000,
-        //   ent_time: 1572590184000,
-        //   create_time: 1572590186000,
-        //   name: "谢海滨1"
-        // },
-        // {
-        //   type: 0,
-        //   begin_time: 1572590180000,
-        //   ent_time: 1572590184000,
-        //   create_time: 1572590186000,
-        //   name: "谢海滨0"
-        // },
-        // {
-        //   type: 1,
-        //   begin_time: 1572590180000,
-        //   ent_time: 1572590184000,
-        //   create_time: 1572590186000,
-        //   name: "谢海滨1"
-        // },
-        // {
-        //   type: 0,
-        //   begin_time: 1572590180000,
-        //   ent_time: 1572590184000,
-        //   create_time: 1572590186000,
-        //   name: "谢海滨0"
-        // },
-        // {
-        //   type: 1,
-        //   begin_time: 1572590180000,
-        //   ent_time: 1572590184000,
-        //   create_time: 1572590186000,
-        //   name: "谢海滨1"
-        // },
-        // {
-        //   type: 0,
-        //   begin_time: 1572590180000,
-        //   ent_time: 1572590184000,
-        //   create_time: 1572590186000,
-        //   name: "谢海滨0"
-        // },
-        // {
-        //   type: 1,
-        //   begin_time: 1572590180000,
-        //   ent_time: 1572590184000,
-        //   create_time: 1572590186000,
-        //   name: "谢海滨1"
-        // },
-        // {
-        //   type: 0,
-        //   begin_time: 1572590180000,
-        //   ent_time: 1572590184000,
-        //   create_time: 1572590186000,
-        //   name: "谢海滨0"
-        // },
-        // {
-        //   type: 1,
-        //   begin_time: 1572590180000,
-        //   ent_time: 1572590184000,
-        //   create_time: 1572590186000,
-        //   name: "谢海滨1"
-        // }
-      ],
+      tableData: [], // 表格数据
       colData: [
         { label: "#", type: "index", width: "55" },
         { prop: "personal_uid", label: "UID", sortable: true },
         { prop: "personal_status", label: "状态" },
         { prop: "personal_nickname", label: "昵称" },
-        { prop: "personal_avatar", label: "头像" },
-        { prop: "personal_favorite_plants_uid", label: "收藏植物" },
-        { prop: "personal_favorite_location_uid", label: "收藏位置" },
-        { prop: "personal_received_message_uid", label: "接收消息" },
         { type: "selection", width: "55" }
-      ],
-      multipleSelection: [],
-      search: ""
+      ], // 表格设置
+      multipleSelection: [], // 选择项
+      search: "", // 搜索内容
+      pagesTotal: 0, // 条目总数
+      currentPage: 1, // 当前页数
     };
   },
   methods: {
+    // 表格checkbox选择项改变
     handleSelectionChange(val) {
       this.multipleSelection = val;
       // console.log(this.multipleSelection);
     },
+    // 点击搜索按钮
     clickSearchBtn() {
       let self = this;
       self.getTableDate();
     },
+    // 分页页数变化
+    currentPageChange(val) {
+      let self = this;
+      self.currentPage = val
+      self.getTableDate();
+    },
+    // 获取表格数据
     getTableDate() {
       let self = this;
       axios({
         url: api.getTable,
-        method: "post"
+        method: "post",
+        data: {
+          page: self.currentPage,
+          search: self.search
+        }
       }).then(res => {
         if (res.data) {
-          res = JSON.parse(res.data);
-          self.tableData = res;
+          res.data.list.forEach(foo => {
+            if (foo.personal_status == 0) {
+              foo.personal_status = '正常'
+            } else if (foo.personal_status == 1) {
+              foo.personal_status = '封禁中'
+            } else {
+              foo.personal_status = '异常'
+            }
+          });
+          self.tableData = res.data.list;
+          self.pagesTotal = res.data.count;
         }
       });
     }
