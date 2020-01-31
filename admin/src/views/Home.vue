@@ -8,6 +8,8 @@
       active-text-color="#fff"
       mode="horizontal"
       @select="menuSelect"
+      v-loading="isLoading.menu"
+      element-loading-background="rgba(0, 0, 0, 0.8)"
     >
       <el-menu-item index="personal_info">
         <i class="el-icon-user"></i>
@@ -30,8 +32,14 @@
     <el-input v-model="search" placeholder="请输入内容" style="display: inline-block;width:200px">
       <i slot="suffix" class="el-input__icon el-icon-search" @click="clickSearchBtn"></i>
     </el-input>
-    <!-- <el-button icon="el-icon-search" circle></el-button> -->
-    <el-button type="danger" round class="btn" disabled>删除</el-button>
+    <el-button
+      type="danger"
+      round
+      class="btn"
+      @click="clickDelBtn"
+      :disabled="multipleSelection.length == 0 ? true : false"
+      :loading="isLoading.del"
+    >删除</el-button>
 
     <el-table
       :data="tableData"
@@ -39,6 +47,7 @@
       :stripe="true"
       @selection-change="handleSelectionChange"
       highlight-current-row
+      v-loading="isLoading.table"
     >
       <el-table-column
         v-for="col in colData"
@@ -68,7 +77,23 @@ import axios from "axios";
 export default {
   data() {
     return {
-      tableData: [], // 表格数据
+      tableData: [
+        // {
+        //   personal_uid: 1234456,
+        //   personal_status: 0,
+        //   personal_nickname: "xiehaibin"
+        // },
+        // {
+        //   personal_uid: 1234457,
+        //   personal_status: 0,
+        //   personal_nickname: "xiehaibin"
+        // },
+        // {
+        //   personal_uid: 1234458,
+        //   personal_status: 0,
+        //   personal_nickname: "xiehaibin"
+        // }
+      ], // 表格数据
       colData: [
         { label: "#", type: "index", width: "55" },
         { prop: "personal_uid", label: "UID", sortable: true },
@@ -76,9 +101,10 @@ export default {
         { prop: "personal_nickname", label: "昵称" },
         { type: "selection", width: "55" }
       ], // 表格设置
+      isLoading: { table: false, del: false, menu: false }, // 加载状态
       tableName: "personal_info", // 表名
-      multipleSelection: [], // 选择项
       search: "", // 搜索内容
+      multipleSelection: [], // 选择项
       pagesTotal: 0, // 条目总数
       currentPage: 1 // 当前页数
     };
@@ -135,15 +161,66 @@ export default {
       }
       self.getTableDate();
     },
+    // 点击 搜索按钮
+    clickSearchBtn() {
+      let self = this;
+      self.getTableDate();
+    },
+    // 点击 删除按钮
+    clickDelBtn() {
+      let self = this;
+      let delUIDIndex = self.tableName.slice(0, -4) + "uid";
+      let delUID = [];
+      self.multipleSelection.forEach(foo => {
+        delUID.push(foo[delUIDIndex]);
+      });
+      self
+        .$confirm(`是否删除这${self.multipleSelection.length}条数据?`, "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+          center: true
+        })
+        .then(() => {
+          self.isLoading.del = true;
+          self.isLoading.menu = true;
+          axios({
+            url: api.adminDel,
+            data: {
+              tableName: self.tableName,
+              delUID
+            },
+            method: "post"
+          })
+            .then(() => {
+              self.isLoading.menu = true;
+              self.getTableDate();
+              self.$message({
+                type: "success",
+                message: "删除成功!"
+              });
+            })
+            .catch(err => {
+              self.getTableDate();
+              self.$message({
+                message: `${err},删除数据失败,请刷新页面重试`,
+                type: "warning"
+              });
+            });
+        })
+        .catch(() => {
+          self.isLoading.menu = false;
+          self.isLoading.del = false;
+          self.$message({
+            type: "info",
+            message: "已取消删除"
+          });
+        });
+    },
     // 表格checkbox选择项改变
     handleSelectionChange(val) {
       this.multipleSelection = val;
       // console.log(this.multipleSelection);
-    },
-    // 点击搜索按钮
-    clickSearchBtn() {
-      let self = this;
-      self.getTableDate();
     },
     // 分页页数变化
     currentPageChange(val) {
@@ -154,8 +231,9 @@ export default {
     // 获取表格数据
     getTableDate() {
       let self = this;
+      self.isLoading.table = true;
       axios({
-        url: api.getTable,
+        url: api.getTableData,
         method: "post",
         data: {
           tableName: self.tableName,
@@ -177,9 +255,12 @@ export default {
             self.tableData = res.data.list;
             self.pagesTotal = res.data.count;
           }
+          self.isLoading.table = false;
+          self.isLoading.del = false;
         })
         .catch(err => {
-          self.tableData = [];
+          self.isLoading.table = false;
+          // self.tableData = [];
           self.$message({
             message: `${err},获取表单数据失败`,
             type: "warning"
