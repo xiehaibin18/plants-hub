@@ -13,9 +13,9 @@ router
      * @param {string} page 页数
      * @param {function} 回调函数
      */
-    getTableData(req.body.tableName, req.body.search, req.body.page, (foo, err) => {
-      if (foo) {
-        res.status(200).json(foo)
+    getTableData(req.body.tableName, req.body.search, req.body.page, (data, err) => {
+      if (data) {
+        res.status(200).json(data)
       } else {
         res.status(500)
         console.log(err)
@@ -23,7 +23,14 @@ router
     })
   })
   .post('/api/adminDel', (req, res) => {
-    console.log(req.body)
+    delTableData(req.body.tableName, req.body.delUID, (data, err) => {
+      if (data) {
+        res.status(200).json(data)
+      } else {
+        res.status(500).json('删除失败')
+        console.log(err)
+      }
+    })
   })
 
 module.exports = router

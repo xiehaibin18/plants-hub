@@ -193,7 +193,7 @@ export default {
             method: "post"
           })
             .then(() => {
-              self.isLoading.menu = true;
+              self.isLoading.menu = false;
               self.getTableDate();
               self.$message({
                 type: "success",
