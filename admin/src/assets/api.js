@@ -1,6 +1,10 @@
+let ip = `http://192.168.2.104:3000`
+// let ip = `http://127.0.0.1:3000`
 export default {
-  Login: 'http://127.0.0.1:3000/api/admin',
-  checkLogin: 'http://127.0.0.1:3000/api/isLogin',
-  getTableData: 'http://127.0.0.1:3000/api/getTableData',
-  adminDel: 'http://127.0.0.1:3000/api/adminDel'
+  ip,
+  Login: `${ip}/api/admin`,
+  checkLogin: `${ip}/api/isLogin`,
+  getTableData: `${ip}/api/getTableData`,
+  adminDelData: `${ip}/api/adminDelData`,
+  adminAddData: `${ip}/api/adminAddData`
 }

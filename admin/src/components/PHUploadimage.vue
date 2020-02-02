@@ -1,5 +1,5 @@
 <template>
-  <div class="pf-uploadimage">
+  <div class="ph-uploadimage">
     <el-upload
       class="upload-image"
       accept="image/jpeg, image/png"
@@ -8,6 +8,8 @@
       list-type="picture-card"
       :on-change="handleOnChange"
       :auto-upload="false"
+      limit="1"
+      :on-exceed="onExceed"
     >
       <i slot="default" class="el-icon-plus"></i>
       <div slot="file" slot-scope="{file}">
@@ -21,9 +23,9 @@
           </span>
         </span>
       </div>
-      <div slot="tip" class="el-upload__tip">只能上传jpg/png文件</div>
+      <div slot="tip" class="el-upload__tip" style="line-height: 20px;">只能上传jpg/png文件</div>
     </el-upload>
-    <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+    <!-- <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button> -->
     <el-dialog :visible.sync="dialogVisible">
       <img width="100%" :src="dialogImageUrl" alt />
     </el-dialog>
@@ -48,6 +50,7 @@ export default {
       this.fileList = this.fileList.filter(foo => {
         return foo.uid != file.uid;
       });
+      this.$emit('submitImage', this.fileList)
     },
     handleOnChange(file) {
       let self = this;
@@ -61,6 +64,7 @@ export default {
       })
         .then(() => {
           self.fileList.push(file);
+          self.$emit('submitImage', self.fileList)
         })
         .catch(err => {
           self.$message({
@@ -68,6 +72,12 @@ export default {
             type: "warning"
           });
         });
+    },
+    onExceed() {
+      this.$message({
+        message: `最多只能添加一张图片`,
+        type: "warning"
+      });
     },
     submitUpload() {
       let self = this;
@@ -83,5 +93,8 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
+.upload-image {
+  overflow: hidden;
+}
 </style>

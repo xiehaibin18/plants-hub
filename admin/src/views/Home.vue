@@ -40,6 +40,7 @@
       :disabled="multipleSelection.length == 0 ? true : false"
       :loading="isLoading.del"
     >删除</el-button>
+    <el-button class="btn" round @click="clickAddBtn">添加</el-button>
 
     <el-table
       :data="tableData"
@@ -67,6 +68,34 @@
       :total="pagesTotal"
       @current-change="currentPageChange"
     ></el-pagination>
+
+    <el-dialog
+      :title="dialogTitle"
+      :visible.sync="dialogVisible"
+      width="50%"
+      center
+      append-to-body="true">
+      <el-form v-if="tableName == 'personal_info'">
+        <el-form-item label="用户名">
+          <el-input v-model="dialogData.personal_info.personal_account"></el-input>
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input v-model="dialogData.personal_info.personal_password"></el-input>
+        </el-form-item>
+        <el-form-item label="昵称">
+          <el-input v-model="dialogData.personal_info.personal_nickname"></el-input>
+        </el-form-item>
+        <el-form-item label="头像">
+          <ph-uploadimage @submitImage="submitImage"></ph-uploadimage>
+        </el-form-item>
+        <el-form-item label="手机号码">
+          <el-input v-model="dialogData.personal_info.personal_number"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button class="btn" round @click="submitData('add')" :loading="isLoading.submit">提交</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -101,12 +130,24 @@ export default {
         { prop: "personal_nickname", label: "昵称" },
         { type: "selection", width: "55" }
       ], // 表格设置
-      isLoading: { table: false, del: false, menu: false }, // 加载状态
+      isLoading: { table: false, del: false, menu: false, submit: false }, // 加载状态
       tableName: "personal_info", // 表名
       search: "", // 搜索内容
       multipleSelection: [], // 选择项
       pagesTotal: 0, // 条目总数
-      currentPage: 1 // 当前页数
+      currentPage: 1, // 当前页数
+      dialogVisible: false, // 遮罩卡片 显示状态
+      dialogTitle: "关闭重试", // 遮罩卡片 标题
+      dialogData: {
+        personal_info: {
+          tableName: "personal_info",
+          personal_account: "",
+          personal_password: "",
+          personal_nickname: "",
+          personal_avatar: "",
+          personal_number: ""
+        },
+      }, // 遮罩卡片 数据
     };
   },
   methods: {
@@ -166,9 +207,72 @@ export default {
       let self = this;
       self.getTableDate();
     },
+    // 点击 添加按钮
+    clickAddBtn() {
+      let self = this
+      self.getTableDate()
+      self.dialogVisible = true
+      self.dialogTitle = self.tableName
+      switch (self.tableName) {
+        case 'personal_info':
+          self.dialogTitle = '添加用户'
+          break;
+        case 'plants_info':
+          self.dialogTitle = '添加植物'
+          break;
+        case 'location_info':
+          self.dialogTitle = '添加位置'
+          break;
+        case 'message_info':
+          self.dialogTitle = '添加留言'
+          break;
+      }
+    },
+    // 获取子组件提交的图片数据
+    submitImage(val) {
+      let self = this
+      self.dialogData.personal_info.personal_avatar = val
+    },
+    // 提交数据
+    submitData(val) {
+      let self = this
+      self.isLoading.submit = true
+      if (val == 'add') {
+        axios({
+          url: api.adminAddData,
+          method: "post",
+          data: self.dialogData.personal_info
+        }).then(res => {
+          self.isLoading.submit = false
+          self.dialogVisible = false
+          self.getTableDate();
+          if (res.data.code == 0) {
+            self.$message({
+              type: "success",
+              message: "添加成功!"
+            });
+          }
+          if (res.data.code == 1) {
+            self.$message({
+              type: "warning",
+              message: res.data.err
+            });
+          }
+        }).catch(() => {
+          self.isLoading.submit = false
+          self.dialogVisible = false
+          self.getTableDate();
+          self.$message({
+            message: `服务器出错,添加数据失败,请刷新页面重试`,
+            type: "warning"
+          });
+        })
+      }
+    },
     // 点击 删除按钮
     clickDelBtn() {
       let self = this;
+      self.getTableDate()
       let delUIDIndex = self.tableName.slice(0, -4) + "uid";
       let delUID = [];
       self.multipleSelection.forEach(foo => {
@@ -185,7 +289,7 @@ export default {
           self.isLoading.del = true;
           self.isLoading.menu = true;
           axios({
-            url: api.adminDel,
+            url: api.adminDelData,
             data: {
               tableName: self.tableName,
               delUID
@@ -220,7 +324,6 @@ export default {
     // 表格checkbox选择项改变
     handleSelectionChange(val) {
       this.multipleSelection = val;
-      // console.log(this.multipleSelection);
     },
     // 分页页数变化
     currentPageChange(val) {
@@ -242,8 +345,8 @@ export default {
         }
       })
         .then(res => {
-          if (res.data) {
-            res.data.list.forEach(foo => {
+          if (res.data.code == 200) {
+            res.data.data.list.forEach(foo => {
               if (foo.personal_status == 0) {
                 foo.personal_status = "正常";
               } else if (foo.personal_status == 1) {
@@ -252,8 +355,10 @@ export default {
                 foo.personal_status = "异常";
               }
             });
-            self.tableData = res.data.list;
-            self.pagesTotal = res.data.count;
+            self.tableData = res.data.data.list;
+            self.pagesTotal = res.data.data.count;
+          } else if (res.data.code == 300){
+            self.$router.replace({ path: "/" });
           }
           self.isLoading.table = false;
           self.isLoading.del = false;
@@ -319,6 +424,16 @@ body {
 .is-active > .el-icon-chat-dot-square {
   color: #fff !important;
 }
+.el-button.btn.el-button--default.is-round {
+  background-color: #0abab5;
+  color: #fff;
+}
+.el-button.btn.el-button--default.is-round:hover {
+  opacity: 0.8;
+}
+.el-button.btn.el-button--default.is-round:active {
+  background-color: #09a29d;
+}
 </style>
 <style scoped>
 .home {
@@ -345,5 +460,6 @@ body {
 }
 .btn {
   float: right;
+  margin-left: 5px;
 }
 </style>

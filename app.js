@@ -34,5 +34,5 @@ app.use(session({
 app.use(index, adminCheckLogin, adminHome)
 
 app.listen(3000, function () {
-  console.log('server is running, http://127.0.0.1:3000')
+  console.log('server is running, http://192.168.2.104:3000')
 })

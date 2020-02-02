@@ -27,8 +27,5 @@ router
       }
     })
   })
-  .post('/api/testimages', (req, res) => {
-    console.log(req.body)
-  })
 
 module.exports = router

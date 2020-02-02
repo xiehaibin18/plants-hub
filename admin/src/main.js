@@ -5,7 +5,7 @@ import 'element-ui/lib/theme-chalk/index.css';
 import axios from 'axios'
 import router from './router'
 
-import PFUploadimage from './components/PFUploadimage'
+import PHUploadimage from './components/PHUploadimage'
 
 Vue.config.productionTip = false
 
@@ -13,7 +13,7 @@ Vue.prototype.$axios= axios
 
 Vue.use(ElementUI);
 
-Vue.component('pf-uploadimage', PFUploadimage);
+Vue.component('ph-uploadimage', PHUploadimage);
 
 new Vue({
   router,
