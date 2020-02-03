@@ -6,5 +6,6 @@ export default {
   checkLogin: `${ip}/api/isLogin`,
   getTableData: `${ip}/api/getTableData`,
   adminDelData: `${ip}/api/adminDelData`,
-  adminAddData: `${ip}/api/adminAddData`
+  adminAddData: `${ip}/api/adminAddData`,
+  adminUpdataData: `${ip}/api/adminUpdataData`,
 }

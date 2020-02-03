@@ -14,6 +14,9 @@ module.exports = function (tableName, data, callback) {
     return new Promise((resolve, reject) => {
       let base64Data = imgData.replace(/^data:image\/\w+;base64,/, "");
       let dataBuffer = Buffer.from(base64Data, 'base64');
+      if (fs.existsSync(path.join(__dirname, `../../public/${filePath}/${imgName}`))) {
+        return reject('图片已存在')
+      }
       fs.writeFile(path.join(__dirname, `../../public/${filePath}/${imgName}`), dataBuffer, function (err) {
         if (err) {
           reject(err)
@@ -52,26 +55,39 @@ module.exports = function (tableName, data, callback) {
           // 获取UID
           UID = createUID(data.personal_number)
           // 保存图片
+          if (data.personal_avatar != '') {
           let imgData = data.personal_avatar[0].base64
           let imgName = data.personal_avatar[0].name
-          saveImage(imgData, imgName, 'avatar')
-            .then(path => {
-              // 字段名及值
-              let column_name = `personal_uid,personal_account,personal_password,personal_nickname,personal_avatar`
-              let VALUES = `${UID},'${data.personal_account}','${data.personal_password}','${data.personal_nickname}','${path}'`
-              query(`INSERT INTO ${tableName}(${column_name}) VALUES (${VALUES})`)
-                .then(() => {
-                  callback('success', null)
-                })
-                .catch(err => {
-                  callback(null, '写入数据失败')
-                  console.log(err)
-                })
-            })
-            .catch(err => {
-              callback(null, '图片保存失败')
-              console.log(err)
-            })
+            saveImage(imgData, imgName, 'avatar')
+              .then(path => {
+                // 字段名及值
+                let column_name = `personal_uid,personal_account,personal_password,personal_nickname,personal_avatar`
+                let VALUES = `${UID},'${data.personal_account}','${data.personal_password}','${data.personal_nickname}','${path}'`
+                query(`INSERT INTO ${tableName}(${column_name}) VALUES (${VALUES})`)
+                  .then(() => {
+                    callback('success', null)
+                  })
+                  .catch(err => {
+                    callback(null, '写入数据失败')
+                    console.log(err)
+                  })
+              })
+              .catch(err => {
+                callback(null, `图片保存失败，${err}`)
+              })
+          } else {
+            // 字段名及值
+            let column_name = `personal_uid,personal_account,personal_password,personal_nickname`
+            let VALUES = `${UID},'${data.personal_account}','${data.personal_password}','${data.personal_nickname}'`
+            query(`INSERT INTO ${tableName}(${column_name}) VALUES (${VALUES})`)
+              .then(() => {
+                callback('success', null)
+              })
+              .catch(err => {
+                callback(null, '写入数据失败')
+                console.log(err)
+              })
+          }
         }
       })
       .catch(err => {

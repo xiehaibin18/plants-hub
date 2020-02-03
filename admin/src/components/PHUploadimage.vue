@@ -50,7 +50,7 @@ export default {
       this.fileList = this.fileList.filter(foo => {
         return foo.uid != file.uid;
       });
-      this.$emit('submitImage', this.fileList)
+      this.$emit('getImageDate', this.fileList)
     },
     handleOnChange(file) {
       let self = this;
@@ -64,7 +64,7 @@ export default {
       })
         .then(() => {
           self.fileList.push(file);
-          self.$emit('submitImage', self.fileList)
+          self.$emit('getImageDate', self.fileList)
         })
         .catch(err => {
           self.$message({
@@ -94,7 +94,9 @@ export default {
 </script>
 
 <style scoped>
-.upload-image {
+.ph-uploadimage {
   overflow: hidden;
+  display: inline-block;
+  margin: 27px 20px 0 20px;
 }
 </style>

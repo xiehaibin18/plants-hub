@@ -5,6 +5,7 @@ const updataAccountToken = require('../../controller/admin/updataAccountToken')
 const getTableData = require('../../controller/admin/getTableData')
 const delTableData = require('../../controller/admin/delTableData')
 const addTableData = require('../../controller/admin/addTableData')
+const updataTableData = require('../../controller/admin/updataTableData')
 
 const router = express.Router()
 
@@ -66,6 +67,20 @@ router
        * @param {function} 回调函数
        */
     addTableData(req.body.tableName, req.body, (data, err) => {
+      if (data) {
+        res.status(200).json({ code: 0, data })
+      } else {
+        res.status(200).json({ code: 1, err })
+      }
+    })
+  })
+  .post('/api/adminUpdataData', (req, res) => {
+    /** 修改表单数据
+       * @param {string} tableName 表名
+       * @param {string} data 添加数据
+       * @param {function} 回调函数
+       */
+    updataTableData(req.body.tableName, req.body.data, (data, err) => {
       if (data) {
         res.status(200).json({ code: 0, data })
       } else {

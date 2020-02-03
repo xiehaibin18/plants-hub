@@ -1,5 +1,6 @@
 <template>
   <div class="home">
+    <!-- NavMenu导航栏 -->
     <el-menu
       default-active="personal_info"
       class="home-menu"
@@ -28,10 +29,11 @@
         <span slot="title">留言管理</span>
       </el-menu-item>
     </el-menu>
-
+    <!-- 搜索框 -->
     <el-input v-model="search" placeholder="请输入内容" style="display: inline-block;width:200px">
       <i slot="suffix" class="el-input__icon el-icon-search" @click="clickSearchBtn"></i>
     </el-input>
+    <!-- 删除按钮 -->
     <el-button
       type="danger"
       round
@@ -40,14 +42,16 @@
       :disabled="multipleSelection.length == 0 ? true : false"
       :loading="isLoading.del"
     >删除</el-button>
+    <!-- 添加按钮 -->
     <el-button class="btn" round @click="clickAddBtn">添加</el-button>
-
+    <!-- 数据表格 -->
     <el-table
       :data="tableData"
       height="535px"
       :stripe="true"
       @selection-change="handleSelectionChange"
       highlight-current-row
+      @row-dblclick="handleRowClick"
       v-loading="isLoading.table"
     >
       <el-table-column
@@ -61,21 +65,23 @@
         :type="col.type"
       ></el-table-column>
     </el-table>
-
+    <!-- 分页 -->
     <el-pagination
       :page-size="10"
       layout="total, prev, pager, next, jumper"
       :total="pagesTotal"
       @current-change="currentPageChange"
     ></el-pagination>
-
+    <!-- 弹出框 -->
     <el-dialog
       :title="dialogTitle"
       :visible.sync="dialogVisible"
       width="50%"
       center
-      append-to-body="true">
-      <el-form v-if="tableName == 'personal_info'">
+      :append-to-body="true"
+      :close-on-click-modal="false">
+      <!-- 添加个人信息 -->
+      <el-form v-if="tableName === 'personal_info' && dialogType === 0">
         <el-form-item label="用户名">
           <el-input v-model="dialogData.personal_info.personal_account"></el-input>
         </el-form-item>
@@ -86,13 +92,44 @@
           <el-input v-model="dialogData.personal_info.personal_nickname"></el-input>
         </el-form-item>
         <el-form-item label="头像">
-          <ph-uploadimage @submitImage="submitImage"></ph-uploadimage>
+          <ph-uploadimage @getImageDate="getImageDate"></ph-uploadimage>
         </el-form-item>
         <el-form-item label="手机号码">
           <el-input v-model="dialogData.personal_info.personal_number"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button class="btn" round @click="submitData('add')" :loading="isLoading.submit">提交</el-button>
+          <el-button class="btn" round @click="submitData(0)" :loading="isLoading.submit">提交</el-button>
+        </el-form-item>
+      </el-form>
+      <!-- 查看/修改个人信息详情 -->
+      <el-form v-if="tableName === 'personal_info' && dialogType !== 0">
+        <el-form-item label="UID">
+          <el-input v-model="dialogData.personal_info_update.personal_uid" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-select v-model="dialogData.personal_info_update.personal_status" :disabled="dialogType === 1 || dialogData.personal_info_update.personal_status === '异常'">
+            <el-option label="正常" value="正常"></el-option>
+            <el-option label="封禁" value="封禁"></el-option>
+            <el-option label="异常" value="异常" disabled></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="用户名">
+          <el-input v-model="dialogData.personal_info_update.personal_account" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="昵称">
+          <el-input v-model="dialogData.personal_info_update.personal_nickname" :disabled="dialogType === 1"></el-input>
+        </el-form-item>
+        <el-form-item label="头像">
+          <div v-if="dialogData.pictureUrl" style="display:inline-block;overflow: hidden;margin: 0 0 10px 0;">
+            <img :src="dialogData.pictureUrl" style="height:148px;width:148px;"/>
+          </div>
+          <div v-else style="display:inline-block;overflow: hidden;margin: 0 0 90px 0;">无</div>
+          <ph-uploadimage @getImageDate="getImageDate" v-if="dialogType === 2"></ph-uploadimage>
+        </el-form-item>
+        <el-form-item>
+          <el-button class="btn" round @click="submitData(1)" v-show="dialogType === 1">修改</el-button>
+          <el-button class="btn" round @click="submitData(3)" v-show="dialogType === 2">取消</el-button>
+          <el-button class="btn" round @click="submitData(2)" v-show="dialogType === 2" :loading="isLoading.update">提交</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -107,21 +144,27 @@ export default {
   data() {
     return {
       tableData: [
-        // {
-        //   personal_uid: 1234456,
-        //   personal_status: 0,
-        //   personal_nickname: "xiehaibin"
-        // },
-        // {
-        //   personal_uid: 1234457,
-        //   personal_status: 0,
-        //   personal_nickname: "xiehaibin"
-        // },
-        // {
-        //   personal_uid: 1234458,
-        //   personal_status: 0,
-        //   personal_nickname: "xiehaibin"
-        // }
+        {
+          personal_uid: "11120200203",
+          personal_status: 0,
+          personal_account: "1",
+          personal_password: "1",
+          personal_nickname: "1",
+          personal_avatar: "/public/avatar/2079122992258142.jpg",
+          personal_favorite_plants_uid: null,
+          personal_favorite_location_uid: null,
+          personal_received_message_uid: null,
+        },
+        {
+          personal_uid: 1234457,
+          personal_status: 0,
+          personal_nickname: "xiehaibin"
+        },
+        {
+          personal_uid: 1234458,
+          personal_status: 0,
+          personal_nickname: "xiehaibin"
+        }
       ], // 表格数据
       colData: [
         { label: "#", type: "index", width: "55" },
@@ -130,14 +173,15 @@ export default {
         { prop: "personal_nickname", label: "昵称" },
         { type: "selection", width: "55" }
       ], // 表格设置
-      isLoading: { table: false, del: false, menu: false, submit: false }, // 加载状态
+      isLoading: { table: false, del: false, menu: false, submit: false, update: false }, // 加载状态
       tableName: "personal_info", // 表名
       search: "", // 搜索内容
       multipleSelection: [], // 选择项
       pagesTotal: 0, // 条目总数
       currentPage: 1, // 当前页数
-      dialogVisible: false, // 遮罩卡片 显示状态
-      dialogTitle: "关闭重试", // 遮罩卡片 标题
+      dialogVisible: false, // 弹出框 显示状态
+      dialogType: 0, // 弹出框显示内容类型; 0添加 1查看 2更新
+      dialogTitle: "关闭重试", // 弹出框 标题
       dialogData: {
         personal_info: {
           tableName: "personal_info",
@@ -147,7 +191,10 @@ export default {
           personal_avatar: "",
           personal_number: ""
         },
-      }, // 遮罩卡片 数据
+        personal_info_beforUpdate: {},
+        personal_info_update: {},
+        pictureUrl: ""
+      }, // 弹出框 数据
     };
   },
   methods: {
@@ -212,7 +259,7 @@ export default {
       let self = this
       self.getTableDate()
       self.dialogVisible = true
-      self.dialogTitle = self.tableName
+      self.dialogType = 0
       switch (self.tableName) {
         case 'personal_info':
           self.dialogTitle = '添加用户'
@@ -229,15 +276,21 @@ export default {
       }
     },
     // 获取子组件提交的图片数据
-    submitImage(val) {
+    getImageDate(val) {
       let self = this
-      self.dialogData.personal_info.personal_avatar = val
+      if (self.tableName == 'personal_info' && self.dialogType === 0) {
+        self.dialogData.personal_info.personal_avatar = val
+      }
+      else if (self.tableName == 'personal_info' && self.dialogType === 2) {
+        self.dialogData.personal_info_update.personal_avatar = val
+      }
     },
     // 提交数据
     submitData(val) {
       let self = this
-      self.isLoading.submit = true
-      if (val == 'add') {
+      // 提交添加数据
+      if (val === 0) {
+        self.isLoading.submit = true
         axios({
           url: api.adminAddData,
           method: "post",
@@ -260,6 +313,52 @@ export default {
           }
         }).catch(() => {
           self.isLoading.submit = false
+          self.dialogVisible = false
+          self.getTableDate();
+          self.$message({
+            message: `服务器出错,添加数据失败,请刷新页面重试`,
+            type: "warning"
+          });
+        })
+      }
+      // 点击修改
+      else if (val === 1) {
+        self.dialogType = 2
+        self.dialogData.personal_info_beforUpdate = Object.assign({}, self.dialogData.personal_info_update)
+      }
+      // 点击取消
+      else if (val === 3) {
+        self.dialogType = 1
+        self.dialogData.personal_info_update = Object.assign({}, self.dialogData.personal_info_beforUpdate)
+      }
+      // 提交修改数据
+      else if (val === 2) {
+        self.isLoading.update = true
+        axios({
+          url: api.adminUpdataData,
+          method: "post",
+          data: {
+            tableName: self.tableName,
+            data: self.dialogData[`${self.tableName}_update`]
+          }
+        }).then(res => {
+          self.isLoading.update = false
+          self.dialogVisible = false
+          self.getTableDate();
+          if (res.data.code == 0) {
+            self.$message({
+              type: "success",
+              message: "添加成功!"
+            });
+          }
+          if (res.data.code == 1) {
+            self.$message({
+              type: "warning",
+              message: res.data.err
+            });
+          }
+        }).catch(() => {
+          self.isLoading.update = false
           self.dialogVisible = false
           self.getTableDate();
           self.$message({
@@ -325,6 +424,21 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },
+    // 双击点击某行
+    handleRowClick(val) {
+      let self = this
+      self.dialogVisible = true
+      self.dialogType = 1
+      if (self.tableName == 'personal_info') {
+        self.dialogTitle = '查看/修改 个人详情'
+        self.dialogData.personal_info_update = Object.assign({}, val)
+        if (val.personal_avatar) {
+          self.dialogData.pictureUrl = api.ip + val.personal_avatar
+        } else{
+          self.dialogData.pictureUrl = null
+        }
+      }
+    },
     // 分页页数变化
     currentPageChange(val) {
       let self = this;
@@ -350,7 +464,7 @@ export default {
               if (foo.personal_status == 0) {
                 foo.personal_status = "正常";
               } else if (foo.personal_status == 1) {
-                foo.personal_status = "封禁中";
+                foo.personal_status = "封禁";
               } else {
                 foo.personal_status = "异常";
               }

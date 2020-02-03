@@ -28,13 +28,13 @@ module.exports = function (tableName, delUID, callback) {
     // 获取被删除的图片地址
     query(`SELECT ${filePath_column_name} FROM ${tableName} WHERE ${column_name} IN (${delUID})`)
       .then(data => {
-        // 删除图片
+        // 有图片则 删除图片
         data = JSON.parse(data)
-        if (data[0][filePath_column_name]) {
-          data.forEach(filePath => {
+        data.forEach(filePath => {
+          if (filePath[filePath_column_name]) {
             fs.unlinkSync(path.join(__dirname, `../..${filePath[filePath_column_name]}`))
-          });
-        }
+          }
+        });
         // 删除数据
         query(`DELETE FROM ${tableName} WHERE ${column_name} IN (${delUID})`)
           .then(() => {
