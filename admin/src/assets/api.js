@@ -8,4 +8,5 @@ export default {
   adminDelData: `${ip}/api/adminDelData`,
   adminAddData: `${ip}/api/adminAddData`,
   adminUpdataData: `${ip}/api/adminUpdataData`,
+  adminGetLocationData: `${ip}/api/adminGetLocationData`,
 }

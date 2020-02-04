@@ -6,6 +6,7 @@ const getTableData = require('../../controller/admin/getTableData')
 const delTableData = require('../../controller/admin/delTableData')
 const addTableData = require('../../controller/admin/addTableData')
 const updataTableData = require('../../controller/admin/updataTableData')
+const getLocationData = require('../../controller/admin/getLocationData')
 
 const router = express.Router()
 
@@ -78,13 +79,23 @@ router
     /** 修改表单数据
        * @param {string} tableName 表名
        * @param {string} data 添加数据
+       * @param {string} pictureUrl 原图片地址
        * @param {function} 回调函数
        */
-    updataTableData(req.body.tableName, req.body.data, (data, err) => {
+    updataTableData(req.body.tableName, req.body.data, req.body.pictureUrl, (data, err) => {
       if (data) {
         res.status(200).json({ code: 0, data })
       } else {
         res.status(200).json({ code: 1, err })
+      }
+    })
+  })
+  .post('/api/adminGetLocationData', (req, res) => {
+    getLocationData((data, err) => {
+      if (data) {
+        res.status(200).json(data)
+      } else {
+        console.log(err)
       }
     })
   })

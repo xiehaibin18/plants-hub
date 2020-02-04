@@ -8,7 +8,7 @@
       list-type="picture-card"
       :on-change="handleOnChange"
       :auto-upload="false"
-      limit="1"
+      :limit="limit"
       :on-exceed="onExceed"
     >
       <i slot="default" class="el-icon-plus"></i>
@@ -75,7 +75,7 @@ export default {
     },
     onExceed() {
       this.$message({
-        message: `最多只能添加一张图片`,
+        message: `最多只能添加${this.limit}张图片`,
         type: "warning"
       });
     },
@@ -89,6 +89,13 @@ export default {
         }
       })
     }
+  },
+  props: {
+    // 图片上传张数限制
+    limit: {
+      type: Number,
+      default: 1
+    },
   }
 };
 </script>

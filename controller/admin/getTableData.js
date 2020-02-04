@@ -22,6 +22,10 @@ module.exports = function (tableName, search, page, callback) {
     list: []
   }
 
+  let search_column = ` `
+  if (search) {
+    search_column = ` WHERE CONCAT (${search_column_name}) LIKE '%${search}%' `
+  }
   switch (search) {
     case '正常':
       search = 0
@@ -35,15 +39,13 @@ module.exports = function (tableName, search, page, callback) {
       search = 2
       search_column_name = `personal_status`
       break;
-    default:
-      break;
   }
 
-  query(`SELECT * FROM ${tableName} WHERE CONCAT (${search_column_name}) LIKE '%${search}%' LIMIT ${start},10`)
+  query(`SELECT * FROM ${tableName}${search_column}LIMIT ${start},10`)
     .then(res => {
       res = JSON.parse(res)
       data.list = res
-      return query(`SELECT COUNT(*) FROM ${tableName} WHERE CONCAT (${search_column_name}) LIKE '%${search}%'`)
+      return query(`SELECT COUNT(*) FROM ${tableName}${search_column}`)
     })
     .then(res => {
       res = JSON.parse(res)

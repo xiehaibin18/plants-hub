@@ -3,22 +3,22 @@ const fs = require('fs')
 
 const query = require('../mysql')
 
-module.exports = function (tableName, data, callback) {
+module.exports = function (tableName, data, pictureUrl, callback) {
 
   /** 转码并写入图片到服务器并返回地址
    * @param {string} imgData 图片base64码
    * @param {string} imgName 图片名
    * @param {string} filePath 保存地址
    */
-  function saveImage(imgData, imgName, filePath) {
+  function saveImage(imgData, imgName, filePath, UID) {
     return new Promise((resolve, reject) => {
       let base64Data = imgData.replace(/^data:image\/\w+;base64,/, "");
       let dataBuffer = Buffer.from(base64Data, 'base64');
-      fs.writeFile(path.join(__dirname, `../../public/${filePath}/${imgName}`), dataBuffer, function (err) {
+      fs.writeFile(path.join(__dirname, `../../public/${filePath}/${UID}_${imgName}`), dataBuffer, function (err) {
         if (err) {
           reject(err)
         } else {
-          resolve(`/public/${filePath}/${imgName}`)
+          resolve(`/public/${filePath}/${UID}_${imgName}`)
         }
       });
     })
@@ -37,11 +37,18 @@ module.exports = function (tableName, data, callback) {
         data.personal_status = 1
         break;
     }
+    // 图片地址 非本地 且 不为空
     if (!fs.existsSync(path.join(__dirname, `../../${data.personal_avatar}`)) && data.personal_avatar) {
-      // 更新图片
+      // 原有图片删除
+      if (pictureUrl) {
+        let fileIndex = pictureUrl.indexOf('/public')
+        let filePath = pictureUrl.slice(fileIndex)
+        fs.unlinkSync(path.join(__dirname, `../..${filePath}`))
+      }
+      // 写入新图片
       let imgData = data.personal_avatar[0].base64
       let imgName = data.personal_avatar[0].name
-      saveImage(imgData, imgName, 'avatar')
+      saveImage(imgData, imgName, 'avatar', data[UIDIndex])
         .then(path => {
           // 更新语句
           let update_column = `personal_status='${data.personal_status}',personal_nickname='${data.personal_nickname}',personal_avatar='${path}'`

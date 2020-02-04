@@ -76,62 +76,219 @@
     <el-dialog
       :title="dialogTitle"
       :visible.sync="dialogVisible"
-      width="50%"
+      width="800px"
       center
       :append-to-body="true"
-      :close-on-click-modal="false">
+      :close-on-click-modal="false"
+    >
       <!-- 添加个人信息 -->
-      <el-form v-if="tableName === 'personal_info' && dialogType === 0">
-        <el-form-item label="用户名">
-          <el-input v-model="dialogData.personal_info.personal_account"></el-input>
+      <el-form
+        label-position="right"
+        label-width="100px"
+        :model="dialogData.personal_info"
+        ref="personal_info"
+        v-if="tableName === 'personal_info' && dialogType === 0"
+      >
+        <el-form-item
+          class="dialog-form-item mgt50"
+          prop="personal_account"
+          :rules="rules.personal_info.personal_account"
+          label="用户名："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            clearable
+            v-model="dialogData.personal_info.personal_account"
+          ></el-input>
         </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="dialogData.personal_info.personal_password"></el-input>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="personal_password"
+          :rules="rules.personal_info.personal_password"
+          label="密码："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            v-model="dialogData.personal_info.personal_password"
+          ></el-input>
         </el-form-item>
-        <el-form-item label="昵称">
-          <el-input v-model="dialogData.personal_info.personal_nickname"></el-input>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="personal_nickname"
+          :rules="rules.personal_info.personal_nickname"
+          label="昵称："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            v-model="dialogData.personal_info.personal_nickname"
+          ></el-input>
         </el-form-item>
-        <el-form-item label="头像">
+
+        <el-form-item class="dialog-form-item" label="头像：">
           <ph-uploadimage @getImageDate="getImageDate"></ph-uploadimage>
         </el-form-item>
-        <el-form-item label="手机号码">
-          <el-input v-model="dialogData.personal_info.personal_number"></el-input>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="personal_number"
+          :rules="rules.personal_info.personal_number"
+          label="手机号码："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            v-model.number="dialogData.personal_info.personal_number"
+          ></el-input>
         </el-form-item>
+
         <el-form-item>
-          <el-button class="btn" round @click="submitData(0)" :loading="isLoading.submit">提交</el-button>
+          <el-button
+            class="btn"
+            round
+            @click="submitData(0,'personal_info')"
+            :loading="isLoading.submit"
+          >提交</el-button>
         </el-form-item>
       </el-form>
+
       <!-- 查看/修改个人信息详情 -->
-      <el-form v-if="tableName === 'personal_info' && dialogType !== 0">
-        <el-form-item label="UID">
-          <el-input v-model="dialogData.personal_info_update.personal_uid" disabled></el-input>
+      <el-form
+        label-position="right"
+        label-width="150px"
+        :model="dialogData.personal_info_update"
+        ref="personal_info_update"
+        v-if="tableName === 'personal_info' && dialogType !== 0"
+      >
+        <el-form-item class="dialog-form-item mgt50" label="(只读)UID：">
+          <el-input
+            class="dialog-form-item-input"
+            v-model="dialogData.personal_info_update.personal_uid"
+            readonly
+          ></el-input>
         </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="dialogData.personal_info_update.personal_status" :disabled="dialogType === 1 || dialogData.personal_info_update.personal_status === '异常'">
+
+        <el-form-item class="dialog-form-item" label="状态：">
+          <el-select
+            v-model="dialogData.personal_info_update.personal_status"
+            :disabled="dialogType === 1 || dialogData.personal_info_update.personal_status === '异常'"
+          >
             <el-option label="正常" value="正常"></el-option>
             <el-option label="封禁" value="封禁"></el-option>
             <el-option label="异常" value="异常" disabled></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="用户名">
-          <el-input v-model="dialogData.personal_info_update.personal_account" disabled></el-input>
+
+        <el-form-item class="dialog-form-item" label="(只读)用户名：">
+          <el-input
+            class="dialog-form-item-input"
+            v-model="dialogData.personal_info_update.personal_account"
+            readonly
+          ></el-input>
         </el-form-item>
-        <el-form-item label="昵称">
-          <el-input v-model="dialogData.personal_info_update.personal_nickname" :disabled="dialogType === 1"></el-input>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="personal_nickname"
+          :rules="rules.personal_info.personal_nickname"
+          label="昵称："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            v-model="dialogData.personal_info_update.personal_nickname"
+            :readonly="dialogType === 1"
+          ></el-input>
         </el-form-item>
-        <el-form-item label="头像">
-          <div v-if="dialogData.pictureUrl" style="display:inline-block;overflow: hidden;margin: 0 0 10px 0;">
-            <img :src="dialogData.pictureUrl" style="height:148px;width:148px;"/>
+
+        <el-form-item class="dialog-form-item" label="头像">
+          <div
+            v-if="dialogData.pictureUrl"
+            style="height:148px;width:148px;display:inline-block;overflow: hidden;margin: 0 0 10px 0;"
+          >
+            <img :src="dialogData.pictureUrl" style="width:100%;" />
           </div>
           <div v-else style="display:inline-block;overflow: hidden;margin: 0 0 90px 0;">无</div>
           <ph-uploadimage @getImageDate="getImageDate" v-if="dialogType === 2"></ph-uploadimage>
         </el-form-item>
+
         <el-form-item>
           <el-button class="btn" round @click="submitData(1)" v-show="dialogType === 1">修改</el-button>
           <el-button class="btn" round @click="submitData(3)" v-show="dialogType === 2">取消</el-button>
-          <el-button class="btn" round @click="submitData(2)" v-show="dialogType === 2" :loading="isLoading.update">提交</el-button>
+          <el-button
+            class="btn"
+            round
+            @click="submitData(2, 'personal_info_update')"
+            v-show="dialogType === 2"
+            :loading="isLoading.update"
+          >提交</el-button>
         </el-form-item>
       </el-form>
+
+      <!-- 添加植物信息 -->
+      <el-form
+        label-position="right"
+        label-width="100px"
+        :model="dialogData.plants_info"
+        ref="plants_info"
+        v-if="tableName === 'plants_info' && dialogType === 0"
+      >
+        <el-form-item
+          class="dialog-form-item mgt50"
+          prop="plants_name"
+          :rules="rules.plants_info.plants_name"
+          label="植物名称："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            clearable
+            v-model="dialogData.plants_info.plants_name"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="plants_introduction"
+          :rules="rules.plants_info.plants_introduction"
+          label="植物简介："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            type="textarea"
+            autosize
+            v-model="dialogData.plants_info.plants_introduction"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          label="植物图片："
+        >
+          <ph-uploadimage :limit="2" @getImageDate="getImageDate"></ph-uploadimage>
+        </el-form-item>
+
+        <el-form-item class="dialog-form-item" label="所处地区：">
+          <el-select
+            v-model="dialogData.plants_info.plants_distributions_uid"
+          >
+            <el-option
+              v-for="item in dialogData.locationOptions"
+              :key="item.location_uid"
+              :label="item.location_name"
+              :value="item.location_uid">
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button
+            class="btn"
+            round
+            @click="submitData(0,'plants_info')"
+            :loading="isLoading.submit"
+          >提交</el-button>
+        </el-form-item>
+      </el-form>
+      
     </el-dialog>
   </div>
 </template>
@@ -153,7 +310,7 @@ export default {
           personal_avatar: "/public/avatar/2079122992258142.jpg",
           personal_favorite_plants_uid: null,
           personal_favorite_location_uid: null,
-          personal_received_message_uid: null,
+          personal_received_message_uid: null
         },
         {
           personal_uid: 1234457,
@@ -173,7 +330,13 @@ export default {
         { prop: "personal_nickname", label: "昵称" },
         { type: "selection", width: "55" }
       ], // 表格设置
-      isLoading: { table: false, del: false, menu: false, submit: false, update: false }, // 加载状态
+      isLoading: {
+        table: false,
+        del: false,
+        menu: false,
+        submit: false,
+        update: false
+      }, // 加载状态
       tableName: "personal_info", // 表名
       search: "", // 搜索内容
       multipleSelection: [], // 选择项
@@ -190,11 +353,118 @@ export default {
           personal_nickname: "",
           personal_avatar: "",
           personal_number: ""
-        },
-        personal_info_beforUpdate: {},
-        personal_info_update: {},
-        pictureUrl: ""
+        }, // 添加个人详情
+        personal_info_beforUpdate: {}, // 个人详情修改前备份数据
+        personal_info_update: {}, // 个人详情修改后数据
+        plants_info: {
+          tableName: "plants_info",
+          plants_name: "",
+          plants_picture: "",
+          plants_distributions_uid: "",
+        }, // 添加植物详情
+        pictureUrl: "", // 原有图片地址
+        locationOptions: [] // 省份选项
       }, // 弹出框 数据
+      rules: {
+        personal_info: {
+          personal_account: [
+            {
+              required: true,
+              message: "请输入账户名，长度在 4 到 12 个数字或者字母",
+              trigger: ["blur", "change"]
+            },
+            {
+              min: 4,
+              max: 12,
+              message: "长度在 4 到 12 个字符以内",
+              trigger: ["blur", "change"]
+            },
+            {
+              type: "string",
+              pattern: /^[A-Za-z0-9]+$/,
+              message: "只能填写数字或者字母"
+            }
+          ],
+          personal_password: [
+            {
+              required: true,
+              message: "请输入密码，长度在 4 到 12 个数字或者字母",
+              trigger: ["blur", "change"]
+            },
+            {
+              min: 4,
+              max: 12,
+              message: "长度在 4 到 12 个字符以内",
+              trigger: ["blur", "change"]
+            },
+            {
+              type: "string",
+              pattern: /^[A-Za-z0-9]+$/,
+              message: "只能填写数字或者字母"
+            }
+          ],
+          personal_nickname: [
+            {
+              required: true,
+              message: "请输入昵称，长度在 2 到 12 的数字、字母或者汉字",
+              trigger: ["blur", "change"]
+            },
+            {
+              min: 2,
+              max: 12,
+              message: "长度在 2 到 12 个字符",
+              trigger: ["blur", "change"]
+            },
+            {
+              type: "string",
+              pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$|/,
+              message: "只能填写数字、字母或者汉字"
+            }
+          ],
+          personal_number: [
+            {
+              required: true,
+              message: "请输入手机号码",
+              trigger: ["blur", "change"]
+            },
+            {
+              pattern: /^((13[0-9])|(14[0-9])|(15[0-9])|(17[0-9])|(18[0-9]))\d{8}$/,
+              message: "请填写正确的手机号码"
+            }
+          ]
+        },
+        plants_info: {
+          plants_name: [
+            {
+              required: true,
+              message: "请输入名称，长度在 12 以内的数字、字母或者汉字",
+              trigger: ["blur", "change"]
+            },
+            {
+              max: 12,
+              message: "长度在 12 个字符以内",
+              trigger: ["blur", "change"]
+            },
+            {
+              type: "string",
+              pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$|/,
+              message: "只能填写数字、字母或者汉字"
+            }
+          ],
+          plants_introduction: [
+            {
+              required: true,
+              message: "请输入简介，长度在 250 以内的字符",
+              trigger: ["blur", "change"]
+            },
+            {
+              max: 250,
+              message: "长度在 250 个字符以内",
+              trigger: ["blur", "change"]
+            }
+          ]
+        }
+      }
     };
   },
   methods: {
@@ -256,122 +526,152 @@ export default {
     },
     // 点击 添加按钮
     clickAddBtn() {
-      let self = this
-      self.getTableDate()
-      self.dialogVisible = true
-      self.dialogType = 0
+      let self = this;
+      self.getTableDate();
+      self.dialogVisible = true;
+      self.dialogType = 0;
       switch (self.tableName) {
-        case 'personal_info':
-          self.dialogTitle = '添加用户'
+        case "personal_info":
+          self.dialogTitle = "添加用户";
           break;
-        case 'plants_info':
-          self.dialogTitle = '添加植物'
+        case "plants_info":
+          self.dialogTitle = "添加植物";
+          axios({
+            url: api.adminGetLocationData,
+            method: "post"
+          }).then(res => {
+            self.dialogData.locationOptions = res.data
+          });
           break;
-        case 'location_info':
-          self.dialogTitle = '添加位置'
+        case "location_info":
+          self.dialogTitle = "添加位置";
           break;
-        case 'message_info':
-          self.dialogTitle = '添加留言'
+        case "message_info":
+          self.dialogTitle = "添加留言";
           break;
       }
     },
     // 获取子组件提交的图片数据
     getImageDate(val) {
-      let self = this
-      if (self.tableName == 'personal_info' && self.dialogType === 0) {
-        self.dialogData.personal_info.personal_avatar = val
-      }
-      else if (self.tableName == 'personal_info' && self.dialogType === 2) {
-        self.dialogData.personal_info_update.personal_avatar = val
+      let self = this;
+      if (self.tableName == "personal_info" && self.dialogType === 0) {
+        self.dialogData.personal_info.personal_avatar = val;
+      } else if (self.tableName == "personal_info" && self.dialogType === 2) {
+        self.dialogData.personal_info_update.personal_avatar = val;
+      } else if (self.tableName == "plants_info" && self.dialogType === 0) {
+        self.dialogData.plants_info.plants_picture = val;
       }
     },
     // 提交数据
-    submitData(val) {
-      let self = this
+    submitData(val, formName) {
+      let self = this;
       // 提交添加数据
       if (val === 0) {
-        self.isLoading.submit = true
-        axios({
-          url: api.adminAddData,
-          method: "post",
-          data: self.dialogData.personal_info
-        }).then(res => {
-          self.isLoading.submit = false
-          self.dialogVisible = false
-          self.getTableDate();
-          if (res.data.code == 0) {
-            self.$message({
-              type: "success",
-              message: "添加成功!"
-            });
+        self.$refs[formName].validate(valid => {
+          if (valid) {
+            self.isLoading.submit = true;
+            axios({
+              url: api.adminAddData,
+              method: "post",
+              data: self.dialogData[formName]
+            })
+              .then(res => {
+                self.isLoading.submit = false;
+                self.dialogVisible = false;
+                self.getTableDate();
+                if (res.data.code == 0) {
+                  self.$message({
+                    type: "success",
+                    message: "添加成功!"
+                  });
+                }
+                if (res.data.code == 1) {
+                  self.$message({
+                    type: "warning",
+                    message: res.data.err
+                  });
+                }
+              })
+              .catch(() => {
+                self.isLoading.submit = false;
+                self.dialogVisible = false;
+                self.getTableDate();
+                self.$message({
+                  message: `服务器出错,添加数据失败,请刷新页面重试`,
+                  type: "warning"
+                });
+              });
+          } else {
+            return;
           }
-          if (res.data.code == 1) {
-            self.$message({
-              type: "warning",
-              message: res.data.err
-            });
-          }
-        }).catch(() => {
-          self.isLoading.submit = false
-          self.dialogVisible = false
-          self.getTableDate();
-          self.$message({
-            message: `服务器出错,添加数据失败,请刷新页面重试`,
-            type: "warning"
-          });
-        })
+        });
       }
       // 点击修改
       else if (val === 1) {
-        self.dialogType = 2
-        self.dialogData.personal_info_beforUpdate = Object.assign({}, self.dialogData.personal_info_update)
+        self.dialogType = 2;
+        self.dialogData.personal_info_beforUpdate = Object.assign(
+          {},
+          self.dialogData.personal_info_update
+        );
       }
       // 点击取消
       else if (val === 3) {
-        self.dialogType = 1
-        self.dialogData.personal_info_update = Object.assign({}, self.dialogData.personal_info_beforUpdate)
+        self.dialogType = 1;
+        self.dialogData.personal_info_update = Object.assign(
+          {},
+          self.dialogData.personal_info_beforUpdate
+        );
       }
       // 提交修改数据
       else if (val === 2) {
-        self.isLoading.update = true
-        axios({
-          url: api.adminUpdataData,
-          method: "post",
-          data: {
-            tableName: self.tableName,
-            data: self.dialogData[`${self.tableName}_update`]
+        self.$refs[formName].validate(valid => {
+          if (valid) {
+            self.isLoading.update = true;
+            axios({
+              url: api.adminUpdataData,
+              method: "post",
+              data: {
+                tableName: self.tableName,
+                data: self.dialogData[`${self.tableName}_update`],
+                pictureUrl: self.dialogData.pictureUrl
+              }
+            })
+              .then(res => {
+                self.isLoading.update = false;
+                self.dialogVisible = false;
+                self.getTableDate();
+                if (res.data.code == 0) {
+                  self.$message({
+                    type: "success",
+                    message: "修改成功!"
+                  });
+                }
+                if (res.data.code == 1) {
+                  self.$message({
+                    type: "warning",
+                    message: res.data.err
+                  });
+                }
+              })
+              .catch(() => {
+                self.isLoading.update = false;
+                self.dialogVisible = false;
+                self.getTableDate();
+                self.$message({
+                  message: `服务器出错,添加数据失败,请刷新页面重试`,
+                  type: "warning"
+                });
+              });
+          } else {
+            return;
           }
-        }).then(res => {
-          self.isLoading.update = false
-          self.dialogVisible = false
-          self.getTableDate();
-          if (res.data.code == 0) {
-            self.$message({
-              type: "success",
-              message: "添加成功!"
-            });
-          }
-          if (res.data.code == 1) {
-            self.$message({
-              type: "warning",
-              message: res.data.err
-            });
-          }
-        }).catch(() => {
-          self.isLoading.update = false
-          self.dialogVisible = false
-          self.getTableDate();
-          self.$message({
-            message: `服务器出错,添加数据失败,请刷新页面重试`,
-            type: "warning"
-          });
-        })
+        });
       }
     },
     // 点击 删除按钮
     clickDelBtn() {
       let self = this;
-      self.getTableDate()
+      self.getTableDate();
       let delUIDIndex = self.tableName.slice(0, -4) + "uid";
       let delUID = [];
       self.multipleSelection.forEach(foo => {
@@ -426,16 +726,16 @@ export default {
     },
     // 双击点击某行
     handleRowClick(val) {
-      let self = this
-      self.dialogVisible = true
-      self.dialogType = 1
-      if (self.tableName == 'personal_info') {
-        self.dialogTitle = '查看/修改 个人详情'
-        self.dialogData.personal_info_update = Object.assign({}, val)
+      let self = this;
+      self.dialogVisible = true;
+      self.dialogType = 1;
+      if (self.tableName == "personal_info") {
+        self.dialogTitle = "查看/修改 个人详情";
+        self.dialogData.personal_info_update = Object.assign({}, val);
         if (val.personal_avatar) {
-          self.dialogData.pictureUrl = api.ip + val.personal_avatar
-        } else{
-          self.dialogData.pictureUrl = null
+          self.dialogData.pictureUrl = api.ip + val.personal_avatar;
+        } else {
+          self.dialogData.pictureUrl = null;
         }
       }
     },
@@ -471,7 +771,7 @@ export default {
             });
             self.tableData = res.data.data.list;
             self.pagesTotal = res.data.data.count;
-          } else if (res.data.code == 300){
+          } else if (res.data.code == 300) {
             self.$router.replace({ path: "/" });
           }
           self.isLoading.table = false;
@@ -548,6 +848,19 @@ body {
 .el-button.btn.el-button--default.is-round:active {
   background-color: #09a29d;
 }
+.el-dialog__header {
+  text-align: left;
+  font-size: 30px;
+}
+.el-dialog__title {
+  margin-left: 20px;
+}
+.el-dialog__headerbtn {
+  margin: 5px 5px 0 0;
+}
+.mgt50 {
+  margin-top: 50px;
+}
 </style>
 <style scoped>
 .home {
@@ -575,5 +888,11 @@ body {
 .btn {
   float: right;
   margin-left: 5px;
+}
+.dialog-form-item {
+  padding-left: 120px;
+}
+.dialog-form-item-input {
+  width: 350px;
 }
 </style>
