@@ -91,7 +91,7 @@ router
     })
   })
   .post('/api/adminGetLocationData', (req, res) => {
-    getLocationData((data, err) => {
+    getLocationData(req.body.type, (data, err) => {
       if (data) {
         res.status(200).json(data)
       } else {

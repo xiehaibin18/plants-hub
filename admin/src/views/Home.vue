@@ -259,23 +259,23 @@
           ></el-input>
         </el-form-item>
 
-        <el-form-item
-          class="dialog-form-item"
-          label="植物图片："
-        >
+        <el-form-item class="dialog-form-item" label="植物图片：">
           <ph-uploadimage :limit="2" @getImageDate="getImageDate"></ph-uploadimage>
         </el-form-item>
 
-        <el-form-item class="dialog-form-item" label="所处地区：">
-          <el-select
-            v-model="dialogData.plants_info.plants_distributions_uid"
-          >
+        <el-form-item
+          class="dialog-form-item"
+          prop="plants_distributions_uid"
+          :rules="rules.plants_info.plants_distributions_uid"
+          label="所处地区："
+        >
+          <el-select v-model="dialogData.plants_info.plants_distributions_uid">
             <el-option
               v-for="item in dialogData.locationOptions"
               :key="item.location_uid"
               :label="item.location_name"
-              :value="item.location_uid">
-            </el-option>
+              :value="item.location_uid"
+            ></el-option>
           </el-select>
         </el-form-item>
 
@@ -288,7 +288,371 @@
           >提交</el-button>
         </el-form-item>
       </el-form>
-      
+
+      <!-- 查看/修改植物信息详情 -->
+      <el-form
+        label-position="right"
+        label-width="150px"
+        :model="dialogData.plants_info_update"
+        ref="plants_info_update"
+        v-if="tableName === 'plants_info' && dialogType !== 0"
+      >
+        <el-form-item class="dialog-form-item mgt50" label="(只读)UID：">
+          <el-input
+            class="dialog-form-item-input"
+            v-model="dialogData.plants_info_update.plants_uid"
+            readonly
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="plants_name"
+          :rules="rules.plants_info.plants_name"
+          label="名称："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            v-model="dialogData.plants_info_update.plants_name"
+            :readonly="dialogType === 1"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="plants_introduction"
+          :rules="rules.plants_info.plants_introduction"
+          label="植物简介："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            type="textarea"
+            autosize
+            v-model="dialogData.plants_info_update.plants_introduction"
+            :readonly="dialogType === 1"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item class="dialog-form-item" label="图片">
+          <div
+            v-if="dialogData.pictureUrl"
+            style="height:148px;width:148px;display:inline-block;overflow: hidden;margin: 0 0 10px 0;"
+          >
+            <img :src="dialogData.pictureUrl" style="width:100%;" />
+          </div>
+          <div v-else style="display:inline-block;overflow: hidden;margin: 0 0 90px 0;">无</div>
+          <ph-uploadimage @getImageDate="getImageDate" v-if="dialogType === 2"></ph-uploadimage>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="plants_distributions_uid"
+          :rules="rules.plants_info.plants_distributions_uid"
+          label="所处地区："
+        >
+          <el-select v-model="dialogData.plants_info_update.plants_distributions_uid" :disabled="dialogType === 1">
+            <el-option
+              v-for="item in dialogData.locationOptions"
+              :key="item.location_uid"
+              :label="item.location_name"
+              :value="item.location_uid"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button class="btn" round @click="submitData(1)" v-show="dialogType === 1">修改</el-button>
+          <el-button class="btn" round @click="submitData(3)" v-show="dialogType === 2">取消</el-button>
+          <el-button
+            class="btn"
+            round
+            @click="submitData(2, 'plants_info_update')"
+            v-show="dialogType === 2"
+            :loading="isLoading.update"
+          >提交</el-button>
+        </el-form-item>
+      </el-form>
+
+      <!-- 添加位置信息 -->
+      <el-form
+        label-position="right"
+        label-width="100px"
+        :model="dialogData.location_info"
+        ref="location_info"
+        v-if="tableName === 'location_info' && dialogType === 0"
+      >
+        <el-form-item
+          class="dialog-form-item mgt50"
+          prop="location_name"
+          :rules="rules.location_info.location_name"
+          label="位置名称："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            clearable
+            v-model="dialogData.location_info.location_name"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="location_introduction"
+          :rules="rules.location_info.location_introduction"
+          label="位置简介："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            type="textarea"
+            autosize
+            v-model="dialogData.location_info.location_introduction"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item class="dialog-form-item" label="位置图片：">
+          <ph-uploadimage :limit="1" @getImageDate="getImageDate"></ph-uploadimage>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="location_parent_uid"
+          :rules="rules.location_info.location_parent_uid"
+          label="所属省/市："
+        >
+          <el-select v-model="dialogData.location_info.location_parent_uid">
+            <el-option
+              v-for="item in dialogData.locationOptions"
+              :key="item.location_uid"
+              :label="item.location_name"
+              :value="item.location_uid"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button
+            class="btn"
+            round
+            @click="submitData(0,'location_info')"
+            :loading="isLoading.submit"
+          >提交</el-button>
+        </el-form-item>
+      </el-form>
+
+      <!-- 查看/修改位置信息详情 -->
+      <el-form
+        label-position="right"
+        label-width="150px"
+        :model="dialogData.location_info_update"
+        ref="location_info_update"
+        v-if="tableName === 'location_info' && dialogType !== 0"
+      >
+        <el-form-item class="dialog-form-item mgt50" label="(只读)UID：">
+          <el-input
+            class="dialog-form-item-input"
+            v-model="dialogData.location_info_update.location_uid"
+            readonly
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="location_name"
+          :rules="rules.location_info.location_name"
+          label="名称："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            v-model="dialogData.location_info_update.location_name"
+            :readonly="dialogType === 1"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="location_introduction"
+          :rules="rules.location_info.location_introduction"
+          label="位置简介："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            type="textarea"
+            autosize
+            v-model="dialogData.location_info_update.location_introduction"
+            :readonly="dialogType === 1"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item class="dialog-form-item" label="图片">
+          <div
+            v-if="dialogData.pictureUrl"
+            style="height:148px;width:148px;display:inline-block;overflow: hidden;margin: 0 0 10px 0;"
+          >
+            <img :src="dialogData.pictureUrl" style="width:100%;" />
+          </div>
+          <div v-else style="display:inline-block;overflow: hidden;margin: 0 0 90px 0;">无</div>
+          <ph-uploadimage @getImageDate="getImageDate" v-if="dialogType === 2"></ph-uploadimage>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="location_parent_uid"
+          :rules="rules.location_info.location_parent_uid"
+          label="所属地区："
+        >
+          <el-select v-model="dialogData.location_info_update.location_parent_uid" :disabled="dialogType === 1">
+            <el-option
+              v-for="item in dialogData.locationOptions"
+              :key="item.location_uid"
+              :label="item.location_name"
+              :value="item.location_uid"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button class="btn" round @click="submitData(1)" v-show="dialogType === 1">修改</el-button>
+          <el-button class="btn" round @click="submitData(3)" v-show="dialogType === 2">取消</el-button>
+          <el-button
+            class="btn"
+            round
+            @click="submitData(2, 'location_info_update')"
+            v-show="dialogType === 2"
+            :loading="isLoading.update"
+          >提交</el-button>
+        </el-form-item>
+      </el-form>
+
+      <!-- 添加留言信息 -->
+      <el-form
+        label-position="right"
+        label-width="100px"
+        :model="dialogData.message_info"
+        ref="message_info"
+        v-if="tableName === 'message_info' && dialogType === 0"
+      >
+        <el-form-item
+          class="dialog-form-item mgt50"
+          prop="type"
+          :rules="rules.message_info.type"
+          label="留言类型："
+        >
+          <el-select @change="getmessageOptions" v-model="dialogData.message_info.type">
+            <el-option label="用户" :value="0"></el-option>
+            <el-option label="植物" :value="1"></el-option>
+            <el-option label="位置" :value="2"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item
+          class="dialog-form-item"
+          prop="message_object_uid"
+          :rules="rules.message_info.message_object_uid"
+          label="留言对象："
+        >
+          <el-select
+            v-model="dialogData.message_info.message_object_uid"
+            :disabled="dialogData.message_info.type === null"
+          >
+            <el-option
+              v-for="item in dialogData.messageOptions"
+              :key="item.uid"
+              :label="item.name"
+              :value="item.uid"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="message_content"
+          :rules="rules.message_info.message_content"
+          label="留言内容："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            type="textarea"
+            autosize
+            v-model="dialogData.message_info.message_content"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="message_isshow"
+          :rules="rules.message_info.message_isshow"
+          label="是否显示："
+          v-show="dialogData.message_info.type"
+        >
+          <el-select v-model="dialogData.message_info.message_isshow">
+            <el-option label="是" :value="0"></el-option>
+            <el-option label="否" :value="1"></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button
+            class="btn"
+            round
+            @click="submitData(0,'message_info')"
+            :loading="isLoading.submit"
+          >提交</el-button>
+        </el-form-item>
+      </el-form>
+
+      <!-- 查看/修改留言信息 -->
+      <el-form
+        label-position="right"
+        label-width="100px"
+        :model="dialogData.message_info_update"
+        ref="message_info_update"
+        v-if="tableName === 'message_info' && dialogType !== 0"
+      >
+        <el-form-item class="dialog-form-item mgt50" label="(只读)UID：">
+          <el-input
+            class="dialog-form-item-input"
+            v-model="dialogData.message_info_update.message_uid"
+            readonly
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="message_content"
+          :rules="rules.message_info.message_content"
+          label="(只读)内容："
+        >
+          <el-input
+            class="dialog-form-item-input"
+            type="textarea"
+            autosize
+            v-model="dialogData.message_info_update.message_content"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item
+          class="dialog-form-item"
+          prop="message_isshow"
+          :rules="rules.message_info.message_isshow"
+          label="是否显示："
+          v-show="!dialogData.message_info_update.message_receiver_uid"
+        >
+          <el-select v-model="dialogData.message_info_update.message_isshow" :disabled="dialogType === 1">
+            <el-option label="是" :value="0"></el-option>
+            <el-option label="否" :value="1"></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button class="btn" round @click="submitData(1)" v-show="dialogType === 1">修改</el-button>
+          <el-button class="btn" round @click="submitData(3)" v-show="dialogType === 2">取消</el-button>
+          <el-button
+            class="btn"
+            round
+            @click="submitData(2, 'message_info_update')"
+            v-show="dialogType === 2"
+            :loading="isLoading.update"
+          >提交</el-button>
+        </el-form-item>
+      </el-form>
     </el-dialog>
   </div>
 </template>
@@ -300,29 +664,8 @@ import axios from "axios";
 export default {
   data() {
     return {
-      tableData: [
-        {
-          personal_uid: "11120200203",
-          personal_status: 0,
-          personal_account: "1",
-          personal_password: "1",
-          personal_nickname: "1",
-          personal_avatar: "/public/avatar/2079122992258142.jpg",
-          personal_favorite_plants_uid: null,
-          personal_favorite_location_uid: null,
-          personal_received_message_uid: null
-        },
-        {
-          personal_uid: 1234457,
-          personal_status: 0,
-          personal_nickname: "xiehaibin"
-        },
-        {
-          personal_uid: 1234458,
-          personal_status: 0,
-          personal_nickname: "xiehaibin"
-        }
-      ], // 表格数据
+      // ------表格------
+      tableData: [], // 表格数据
       colData: [
         { label: "#", type: "index", width: "55" },
         { prop: "personal_uid", label: "UID", sortable: true },
@@ -340,12 +683,15 @@ export default {
       tableName: "personal_info", // 表名
       search: "", // 搜索内容
       multipleSelection: [], // 选择项
+      // ------分页------
       pagesTotal: 0, // 条目总数
       currentPage: 1, // 当前页数
+      // ------弹出框------
       dialogVisible: false, // 弹出框 显示状态
       dialogType: 0, // 弹出框显示内容类型; 0添加 1查看 2更新
       dialogTitle: "关闭重试", // 弹出框 标题
       dialogData: {
+        // 添加个人详情
         personal_info: {
           tableName: "personal_info",
           personal_account: "",
@@ -353,17 +699,40 @@ export default {
           personal_nickname: "",
           personal_avatar: "",
           personal_number: ""
-        }, // 添加个人详情
+        },
         personal_info_beforUpdate: {}, // 个人详情修改前备份数据
         personal_info_update: {}, // 个人详情修改后数据
+        // 添加植物详情
         plants_info: {
           tableName: "plants_info",
           plants_name: "",
           plants_picture: "",
-          plants_distributions_uid: "",
-        }, // 添加植物详情
+          plants_distributions_uid: ""
+        },
+        plants_info_beforUpdate: {}, // 植物详情修改前备份数据
+        plants_info_update: {}, // 植物详情修改后数据
+        // 添加位置详情
+        location_info: {
+          tableName: "location_info",
+          location_name: "",
+          location_picture: "",
+          location_parent_uid: ""
+        },
+        location_info_beforUpdate: {}, // 位置详情修改前备份数据
+        location_info_update: {}, // 位置详情修改后数据
+        // 添加留言信息
+        message_info: {
+          tableName: "message_info",
+          type: null,
+          message_object_uid: "",
+          message_content: "",
+          message_isshow: 0
+        },
+        message_info_beforUpdate: {}, // 留言详情修改前备份数据
+        message_info_update: {}, // 留言详情修改后数据
         pictureUrl: "", // 原有图片地址
-        locationOptions: [] // 省份选项
+        locationOptions: [], // 省份选项
+        messageOptions: [] // 消息选项
       }, // 弹出框 数据
       rules: {
         personal_info: {
@@ -462,6 +831,86 @@ export default {
               message: "长度在 250 个字符以内",
               trigger: ["blur", "change"]
             }
+          ],
+          plants_distributions_uid: [
+            {
+              required: true,
+              message: "请选择所处地区",
+              trigger: "change"
+            }
+          ]
+        },
+        location_info: {
+          location_name: [
+            {
+              required: true,
+              message: "请输入名称，长度在 20 以内的数字、字母或者汉字",
+              trigger: ["blur", "change"]
+            },
+            {
+              max: 20,
+              message: "长度在 20 个字符以内",
+              trigger: ["blur", "change"]
+            },
+            {
+              type: "string",
+              pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$|/,
+              message: "只能填写数字、字母或者汉字"
+            }
+          ],
+          location_introduction: [
+            {
+              required: true,
+              message: "请输入简介，长度在 250 以内的字符",
+              trigger: ["blur", "change"]
+            },
+            {
+              max: 250,
+              message: "长度在 250 个字符以内",
+              trigger: ["blur", "change"]
+            }
+          ],
+          location_parent_uid: [
+            {
+              required: true,
+              message: "请选择所属省/市",
+              trigger: "change"
+            }
+          ]
+        },
+        message_info: {
+          type: [
+            {
+              required: true,
+              message: "请选择留言类型",
+              trigger: "change"
+            }
+          ],
+          message_object_uid: [
+            {
+              required: true,
+              message: "请选择留言对象",
+              trigger: "change"
+            }
+          ],
+          message_content: [
+            {
+              required: true,
+              message: "请输入内容，长度在 150 以内的字符",
+              trigger: ["blur", "change"]
+            },
+            {
+              max: 150,
+              message: "长度在 250 个字符以内",
+              trigger: ["blur", "change"]
+            }
+          ],
+          message_isshow: [
+            {
+              required: true,
+              message: "请选择是否显示",
+              trigger: "change"
+            }
           ]
         }
       }
@@ -509,6 +958,7 @@ export default {
             { prop: "message_sender_uid", label: "留言账户" },
             { prop: "message_receiver_uid", label: "接受账户" },
             { prop: "message_plants_uid", label: "留言所处植物" },
+            { prop: "message_location_uid", label: "留言所处位置" },
             { prop: "message_content", label: "留言内容" },
             { prop: "message_date", label: "留言日期" },
             { prop: "message_like", label: "点赞数", sortable: true },
@@ -536,12 +986,6 @@ export default {
           break;
         case "plants_info":
           self.dialogTitle = "添加植物";
-          axios({
-            url: api.adminGetLocationData,
-            method: "post"
-          }).then(res => {
-            self.dialogData.locationOptions = res.data
-          });
           break;
         case "location_info":
           self.dialogTitle = "添加位置";
@@ -550,6 +994,12 @@ export default {
           self.dialogTitle = "添加留言";
           break;
       }
+      axios({
+        url: api.adminGetLocationData,
+        method: "post"
+      }).then(res => {
+        self.dialogData.locationOptions = res.data;
+      });
     },
     // 获取子组件提交的图片数据
     getImageDate(val) {
@@ -560,6 +1010,12 @@ export default {
         self.dialogData.personal_info_update.personal_avatar = val;
       } else if (self.tableName == "plants_info" && self.dialogType === 0) {
         self.dialogData.plants_info.plants_picture = val;
+      } else if (self.tableName == "plants_info" && self.dialogType === 2) {
+        self.dialogData.plants_info_update.plants_picture = val;
+      } else if (self.tableName == "location_info" && self.dialogType === 0) {
+        self.dialogData.location_info.location_picture = val;
+      } else if (self.tableName == "location_info" && self.dialogType === 2) {
+        self.dialogData.location_info_update.location_picture = val;
       }
     },
     // 提交数据
@@ -613,6 +1069,10 @@ export default {
           {},
           self.dialogData.personal_info_update
         );
+        self.dialogData.plants_info_beforUpdate = Object.assign(
+          {},
+          self.dialogData.plants_info_update
+        );
       }
       // 点击取消
       else if (val === 3) {
@@ -620,6 +1080,10 @@ export default {
         self.dialogData.personal_info_update = Object.assign(
           {},
           self.dialogData.personal_info_beforUpdate
+        );
+        self.dialogData.plants_info_update = Object.assign(
+          {},
+          self.dialogData.plants_info_beforUpdate
         );
       }
       // 提交修改数据
@@ -724,11 +1188,18 @@ export default {
     handleSelectionChange(val) {
       this.multipleSelection = val;
     },
-    // 双击点击某行
+    // 双击某行
     handleRowClick(val) {
       let self = this;
       self.dialogVisible = true;
       self.dialogType = 1;
+      self.getmessageOptions()
+      axios({
+        url: api.adminGetLocationData,
+        method: "post"
+      }).then(res => {
+        self.dialogData.locationOptions = res.data;
+      });
       if (self.tableName == "personal_info") {
         self.dialogTitle = "查看/修改 个人详情";
         self.dialogData.personal_info_update = Object.assign({}, val);
@@ -737,6 +1208,25 @@ export default {
         } else {
           self.dialogData.pictureUrl = null;
         }
+      } else if (self.tableName == "plants_info") {
+        self.dialogTitle = "查看/修改 植物详情";
+        self.dialogData.plants_info_update = Object.assign({}, val);
+        if (val.plants_picture) {
+          self.dialogData.pictureUrl = api.ip + val.plants_picture;
+        } else {
+          self.dialogData.pictureUrl = null;
+        }
+      } else if (self.tableName == "location_info") {
+        self.dialogTitle = "查看/修改 位置详情";
+        self.dialogData.location_info_update = Object.assign({}, val);
+        if (val.location_picture) {
+          self.dialogData.pictureUrl = api.ip + val.location_picture;
+        } else {
+          self.dialogData.pictureUrl = null;
+        }
+      } else if (self.tableName == "message_info") {
+        self.dialogTitle = "查看/修改 留言详情";
+        self.dialogData.message_info_update = Object.assign({}, val);
       }
     },
     // 分页页数变化
@@ -765,7 +1255,7 @@ export default {
                 foo.personal_status = "正常";
               } else if (foo.personal_status == 1) {
                 foo.personal_status = "封禁";
-              } else {
+              } else if (foo.personal_status == 3) {
                 foo.personal_status = "异常";
               }
             });
@@ -785,6 +1275,18 @@ export default {
             type: "warning"
           });
         });
+    },
+    // 获取留言对象选项
+    getmessageOptions() {
+      let self = this;
+      self.dialogData.message_info.message_object_uid = null;
+      axios({
+        data: { type: self.dialogData.message_info.type },
+        url: api.adminGetLocationData,
+        method: "post"
+      }).then(res => {
+        self.dialogData.messageOptions = res.data;
+      });
     }
   },
   mounted() {
