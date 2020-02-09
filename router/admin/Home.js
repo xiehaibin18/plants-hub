@@ -99,5 +99,9 @@ router
       }
     })
   })
+  .post('/api/adminSignout', (req, res) => {
+    req.session.isLogin = false
+    res.status(200).json({ 'message': 'Signout success' })
+  })
 
 module.exports = router

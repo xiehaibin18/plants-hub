@@ -29,6 +29,7 @@
         <span slot="title">留言管理</span>
       </el-menu-item>
     </el-menu>
+    <el-button type="danger" class="out-btn" @click="handleSignoutClick">注销</el-button>
     <!-- 搜索框 -->
     <el-input v-model="search" placeholder="请输入内容" style="display: inline-block;width:200px">
       <i slot="suffix" class="el-input__icon el-icon-search" @click="clickSearchBtn"></i>
@@ -1287,6 +1288,39 @@ export default {
       }).then(res => {
         self.dialogData.messageOptions = res.data;
       });
+    },
+    // 登出
+    handleSignoutClick() {
+      let self = this;
+      self
+        .$confirm(`是否退出登录?`, "提示", {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+          center: true
+        })
+        .then(() => {
+          axios({
+            url: api.adminSignout,
+            method: "post"
+          })
+            .then(() => {
+              self.$router.replace({ path: "/" });
+              self.$message({
+                message: `登出成功`,
+                type: "success"
+              });
+            })
+            .catch(err => {
+              self.getTableDate();
+              self.$message({
+                message: `${err},请刷新页面重试`,
+                type: "warning"
+              });
+            });
+        })
+        .catch(() => {
+        });
     }
   },
   mounted() {
@@ -1396,5 +1430,11 @@ body {
 }
 .dialog-form-item-input {
   width: 350px;
+}
+.out-btn {
+  position: absolute;
+  z-index: 999;
+  bottom: 10px;
+  right: 0px;
 }
 </style>
