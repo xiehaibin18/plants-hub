@@ -1,4 +1,4 @@
-let ip = `http://192.168.2.104:3000`
+let ip = `http://192.168.0.103:3000`
 // let ip = `http://127.0.0.1:3000`
 export default {
   ip,
@@ -10,4 +10,5 @@ export default {
   adminUpdataData: `${ip}/api/adminUpdataData`,
   adminGetLocationData: `${ip}/api/adminGetLocationData`,
   adminSignout: `${ip}/api/adminSignout`,
+  pictureRecognition: `${ip}/api/pictureRecognition`,
 }

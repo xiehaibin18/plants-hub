@@ -103,5 +103,8 @@ router
     req.session.isLogin = false
     res.status(200).json({ 'message': 'Signout success' })
   })
+  .post('/api/pictureRecognition', (req, res) => {
+    console.log(req.body)
+  })
 
 module.exports = router
