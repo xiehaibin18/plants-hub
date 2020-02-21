@@ -105,7 +105,7 @@ router
     res.status(200).json({ 'message': 'Signout success' })
   })
   .post('/api/pictureRecognition', (req, res) => {
-    /** 添加表单数据
+    /** 图片识别
    * @param {string} roles 身份
    * @param {string} picture 图片信息
    * @param {function} 回调函数
