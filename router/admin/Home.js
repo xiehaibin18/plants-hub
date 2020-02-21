@@ -7,7 +7,6 @@ const delTableData = require('../../controller/admin/delTableData')
 const addTableData = require('../../controller/admin/addTableData')
 const updataTableData = require('../../controller/admin/updataTableData')
 const getLocationData = require('../../controller/admin/getLocationData')
-const pictureRecognition = require('../../controller/pictureRecognition')
 
 const router = express.Router()
 
@@ -103,20 +102,6 @@ router
   .post('/api/adminSignout', (req, res) => {
     req.session.isLogin = false
     res.status(200).json({ 'message': 'Signout success' })
-  })
-  .post('/api/pictureRecognition', (req, res) => {
-    /** 图片识别
-   * @param {string} roles 身份
-   * @param {string} picture 图片信息
-   * @param {function} 回调函数
-   */
-    pictureRecognition(req.body.roles, req.body.picture, (data, err) => {
-      if (data) {
-        res.status(200).json({ code: 0, data })
-      } else {
-        res.status(200).json({ code: 1, err })
-      }
-    })
   })
 
 module.exports = router
