@@ -6,6 +6,7 @@ const session = require('express-session')
 const index = require('./router/index')
 const adminCheckLogin = require('./router/admin/CheckLogin')
 const adminHome = require('./router/admin/Home')
+const clientPersonal = require('./router/client/Personal')
 
 const app = express()
 
@@ -31,7 +32,7 @@ app.use(session({
   saveUninitialized: true
 }))
 // 挂载路由
-app.use(index, adminCheckLogin, adminHome)
+app.use(index, adminCheckLogin, adminHome, clientPersonal)
 
 app.listen(3000, function () {
   console.log('server is running, http://192.168.0.103:3000 or http://127.0.0.1:3000')
