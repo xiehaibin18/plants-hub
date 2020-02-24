@@ -21,5 +21,7 @@ module.exports = function (acc, pwd, callback) {
         callback(null, { 'err_code': 0, 'message': 'ok'})
         updataAccountToken(acc, pwd)
       }
+    }, err => {
+      return callback(err, null)
     })
 }
