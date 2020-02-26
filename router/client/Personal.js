@@ -21,7 +21,6 @@ router
     }
   })
   .post('/api/CheckLogin', (req, res) => {
-    console.log(req.body)
     if (!req.body.account || !req.body.password) {
       res.status(400).json({"err_code": 1,"msg":"数据传输失败"})
     } else {
