@@ -3,6 +3,7 @@ const express = require('express')
 const CheckAccountToken = require('../../controller/client/CheckAccountToken')
 const CheckLogin = require('../../controller/client/CheckLogin')
 const UserRegister = require('../../controller/client/UserRegister')
+const UserGetData = require('../../controller/client/UserGetData')
 
 const router = express.Router()
 
@@ -38,6 +39,19 @@ router
       res.status(400).json({"err_code": 400,"msg":"数据传输失败"})
     } else {
       UserRegister(req.body, (err, data) => {
+        if (data) {
+          res.status(200).json(data)
+        } else {
+          res.status(500).json(err)
+        }
+      })
+    }
+  })
+  .post('/api/UserGetData', (req, res) => {
+    if (!req.body) {
+      res.status(400).json({"err_code": 1,"msg":"数据传输失败"})
+    } else {
+      UserGetData(req.body, (err, data) => {
         if (data) {
           res.status(200).json(data)
         } else {

@@ -132,6 +132,7 @@ module.exports = function (roles, data, callback) {
           return callback(null, '识别结果相似度小于50%')
         }
         if(roles == 'admin') {
+          console.log(result.data)
           // 字段名及值
           let column_name = `plants_name,plants_introduction,plants_picture`
           data.plants_picture = data
@@ -144,7 +145,7 @@ module.exports = function (roles, data, callback) {
           addData(data.plants_picture, 'plants_info', data, column_name, null, callback)
         }
         if(roles == 'client') {
-          return callback(null, `${JSON.stringify(result.data.result)}`)
+          return callback(`${JSON.stringify(result.data.result)}`, null)
         }
       }).catch(err => {
         callback(null, `请求百度识图失败，${err}`)
