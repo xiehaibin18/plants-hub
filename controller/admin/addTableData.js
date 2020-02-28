@@ -212,7 +212,7 @@ module.exports = function (tableName, data, callback) {
     let message_object_name
     // 添加用户留言
     if (data.type === 0) {
-      message_object_name = `message_sender_uid`
+      message_object_name = `message_receiver_uid`
     }
     // 添加植物留言
     if (data.type === 1) {

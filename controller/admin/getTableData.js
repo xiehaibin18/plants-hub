@@ -26,6 +26,7 @@ module.exports = function (tableName, search, page, callback) {
 
   let search_column = ` `
   if (search) {
+    ASC = ""
     search_column = ` WHERE CONCAT (${search_column_name}) LIKE '%${search}%' `
   }
   switch (search) {

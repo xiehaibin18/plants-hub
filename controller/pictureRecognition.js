@@ -137,7 +137,7 @@ module.exports = function (roles, data, callback) {
           let column_name = `plants_name,plants_introduction,plants_picture`
           data.plants_picture = data
           data.plants_name = result.data.result[0].name
-          if (data.plants_introduction) {
+          if (result.data.result[0].baike_info.description.slice(0, 240)) {
             data.plants_introduction = `${result.data.result[0].baike_info.description.slice(0, 240)}...`
           } else {
             data.plants_introduction = '暂无'
