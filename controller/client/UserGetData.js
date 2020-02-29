@@ -9,6 +9,11 @@ module.exports = function (data, callback) {
   if (data.type == 'getUserInfo') {
     column = `SELECT personal_nickname,personal_avatar FROM personal_info WHERE account_token='${data.accountToken}'`
   }
+  if (data.type == 'getUserMessage') {
+    column = `SELECT message_uid as id,message_sender_uid as name,message_date as time,message_content as content
+    FROM message_info
+    WHERE message_isShow=0 AND message_receiver_uid LIKE '${data.accountToken.slice(0, 11)}________'`
+  }
   query(column)
     .then(res => {
       res = JSON.parse(res)
@@ -22,7 +27,41 @@ module.exports = function (data, callback) {
           element.personal_avatar = `http://192.168.0.105:3000${element.personal_avatar}`
         });
       }
-      callback(null, { 'err_code': 0, 'data': res })
+      let counter = 0
+      let resLength = res.length
+      let notGlobalCallback = false
+      if (data.type == 'getUserMessage') {
+        res.forEach(element => {
+          let date = new Date(element.time)
+          Y = date.getFullYear() + '-';
+          M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+          D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + ' ';
+          date = Y + M + D
+          element.time = date
+          if (element.name == 'admin') {
+            resLength = resLength - 1
+            element.name = '系统通知'
+            element.avatar = `http://192.168.0.105:3000/public/avatar/admin.png`
+          } else {
+            notGlobalCallback = true
+            query(`SELECT personal_nickname,personal_avatar FROM personal_info
+          WHERE personal_uid='${element.name}'`)
+              .then(elementRes => {
+                counter = counter + 1
+                elementRes = JSON.parse(elementRes)
+                element.name = elementRes[0].personal_nickname
+                element.avatar = `http://192.168.0.105:3000${elementRes[0].personal_avatar}`
+                if (counter == resLength) {
+                  console.log(res)
+                  return callback(null, { 'err_code': 0, 'data': res })
+                }
+              })
+          }
+        });
+      }
+      if (!notGlobalCallback) {
+        callback(null, { 'err_code': 0, 'data': res })
+      }
     })
     .catch(err => {
       callback(err, null)
