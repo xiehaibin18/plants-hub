@@ -106,11 +106,11 @@ module.exports = function (tableName, data, callback) {
   if (tableName == 'personal_info') {
 
     // 检查手机号码是否注册
-    query(`SELECT COUNT(*) FROM personal_info WHERE personal_uid LIKE '${data.personal_number}%'`)
+    query(`SELECT COUNT(*) FROM personal_info WHERE personal_uid LIKE '${data.personal_number}%' OR personal_account='${data.personal_account}'`)
       .then(res => {
         res = JSON.parse(res)
         if (res[0]['COUNT(*)'] > 0) {
-          callback(null, '手机号码已注册')
+          callback(null, '手机号码或者账号已注册')
         } else {
           // 获取UID
           UID = createUID(data.personal_number)

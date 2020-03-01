@@ -17,11 +17,11 @@ const query = require('../mysql')
 
 module.exports = function (data, callback) {
   // 检查手机号码是否注册
-  query(`SELECT COUNT(*) FROM personal_info WHERE personal_uid LIKE '${data.phone}%'`)
+  query(`SELECT COUNT(*) FROM personal_info WHERE personal_uid LIKE '${data.phone}%' OR personal_account='${data.account}'`)
   .then(res => {
     res = JSON.parse(res)
     if (res[0]['COUNT(*)'] > 0) {
-      callback(null, { 'err_code': 1, 'message': '手机号码已注册' })
+      callback(null, { 'err_code': 1, 'message': '手机号码或者账号已注册' })
     } else {
       // 获取UID
       UID = createUID(data.phone)
