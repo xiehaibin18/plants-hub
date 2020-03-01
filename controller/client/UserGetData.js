@@ -55,8 +55,9 @@ module.exports = function (data, callback) {
             element.avatar = `${ip}/public/avatar/admin.png`
           } else {
             notGlobalCallback = true
+            element.senderUid = element.name
             query(`SELECT personal_nickname,personal_avatar FROM personal_info
-          WHERE personal_uid='${element.name}'`)
+          WHERE personal_uid LIKE '${element.name}%'`)
               .then(elementRes => {
                 counter = counter + 1
                 elementRes = JSON.parse(elementRes)
