@@ -16,10 +16,18 @@ module.exports = function (data, callback) {
     if (data.messageType == 0) { data.msgloc = `message_plants_uid` } else if (data.messageType == 1) { data.msgloc = `message_location_uid` }
     column = `INSERT INTO message_info(message_uid,message_sender_uid,message_receiver_uid,${data.msgloc},message_content,message_date,message_isshow)
     VALUES ('${uuid}','${data.accountToken.slice(0, 11)}','${data.receiverUid}','${data.messageLocation}','${data.content}','${date}',0)`
-//  return console.log(column)
   }
   if (data.type == 'messageLike') {
     column = `UPDATE message_info SET message_like=message_like+1 WHERE message_uid='${data.messageId}'`
+  }
+  if (data.type == 'userDoFavorite') {
+    if (data.isFavorite == 0) {
+      column = `INSERT INTO personal_favorite_info(personal_uid,personal_favorite_type,personal_favorite_item_uid)
+      VALUES ('${data.accountToken.slice(0, 11)}',${parseInt(data.uidType)},'${data.itemUid}')`
+    } else {
+      column = `DELETE FROM personal_favorite_info
+      WHERE personal_uid='${data.accountToken.slice(0, 11)}' AND personal_favorite_type=${parseInt(data.uidType)} AND personal_favorite_item_uid='${data.itemUid}'`
+    }
   }
   query(column)
     .then(res => {

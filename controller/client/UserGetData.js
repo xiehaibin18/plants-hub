@@ -22,6 +22,9 @@ module.exports = function (data, callback) {
     WHERE personal_uid='${data.accountToken.slice(0, 11)}'
     ORDER BY personal_favorite_uid ASC`
   }
+  if (data.type == 'getDetailData') {
+    return console.log(data)
+  }
   query(column)
     .then(res => {
       res = JSON.parse(res)
