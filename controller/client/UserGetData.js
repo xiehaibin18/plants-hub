@@ -13,7 +13,7 @@ module.exports = function (data, callback) {
   if (data.type == 'getUserMessage') {
     column = `SELECT message_uid as id,message_sender_uid as name,message_date as time,message_content as content,message_plants_uid,message_location_uid
     FROM message_info
-    WHERE message_isShow=0 AND message_receiver_uid LIKE '${data.accountToken.slice(0, 11)}________'
+    WHERE message_isShow=0 AND message_receiver_uid LIKE '${data.accountToken.slice(0, 11)}%'
     ORDER BY message_date DESC`
   }
   if (data.type == 'getUserFavorite') {

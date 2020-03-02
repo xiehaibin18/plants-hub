@@ -145,7 +145,7 @@ module.exports = function (roles, data, callback) {
           addData(data.plants_picture, 'plants_info', data, column_name, null, callback)
         }
         if(roles == 'client') {
-          return callback(`${JSON.stringify(result.data.result)}`, null)
+          return callback(result.data.result, null)
         }
       }).catch(err => {
         callback(null, `请求百度识图失败，${err}`)
