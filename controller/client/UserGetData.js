@@ -33,6 +33,11 @@ module.exports = function (data, callback) {
       WHERE location_uid='${data.itemUid}'`
     }
   }
+  if (data.type == 'homeHot') {
+    column = `SELECT plants_uid,plants_name,plants_introduction,plants_picture,plants_like
+    FROM plants_info
+    ORDER BY plants_like DESC`
+  }
   query(column)
     .then(res => {
       res = JSON.parse(res)
@@ -247,6 +252,38 @@ module.exports = function (data, callback) {
               }
             }
           })
+      }
+      if (data.type == 'homeHot') {
+        notGlobalCallback = true
+        res.forEach(element => {
+          element.plants_picture = `${ip}${element.plants_picture}`
+        });
+        query(`SELECT location_uid as plants_uid,location_name as plants_name,location_introduction as plants_introduction,location_picture as plants_picture,location_like as plants_like
+        FROM location_info
+        ORDER BY location_like DESC`)
+        .then(hotRes => {
+          hotRes = JSON.parse(hotRes)
+          // res前5 
+          resOut = res.splice(5)
+          // hotRes前5 
+          hotResOut = hotRes.splice(5)
+          // 去除部分合并
+          resOut.concat(hotResOut)
+          // 去除部分打乱
+          resOut.sort((a, b) => {
+            return Math.random() > .5 ? -1 : 1
+          })
+          // 去除部分前5 
+          resOut = resOut.splice(5)
+          // 最终合并
+          res = res.concat(hotRes)
+          res = res.concat(resOut)
+          // 最终打乱
+          res.sort((a, b) => {
+            return Math.random() > .5 ? -1 : 1
+          })
+          return callback(null, { 'err_code': 0, 'data': res })
+        })
       }
 
       if (!notGlobalCallback) {
