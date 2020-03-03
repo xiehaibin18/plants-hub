@@ -139,12 +139,12 @@ module.exports = function (data, callback) {
         let plants_info = query(`SELECT plants_uid,plants_name,plants_introduction,plants_picture,plants_like
         FROM plants_info
         WHERE plants_distributions_uid='${data.itemUid}'`)
-        .then(plantsRes => {
-          plantsRes = JSON.parse(plantsRes)
-          if (plantsRes.length > 0) {
-            res[0].plants = plantsRes
-          }
-        })
+          .then(plantsRes => {
+            plantsRes = JSON.parse(plantsRes)
+            if (plantsRes.length > 0) {
+              res[0].plants = plantsRes
+            }
+          })
         // 首先进行留言查询
         let messageLength
         query(`SELECT message_uid,message_sender_uid,message_receiver_uid,message_date,message_content,message_like
@@ -168,7 +168,34 @@ module.exports = function (data, callback) {
                 if (element.message_sender_uid == 'admin') {
                   messageLength = messageLength - 1
                   element.message_sender_uid = '系统通知'
-                } else {
+                }
+                else if (element.message_receiver_uid == 'null') {
+                  query(`SELECT personal_nickname FROM personal_info
+            WHERE personal_uid LIKE '${element.message_sender_uid}%'`)
+                    .then(elementRes1 => {
+                      messageLength = messageLength - 1
+                      elementRes1 = JSON.parse(elementRes1)
+                      element.message_sender_name = elementRes1[0].personal_nickname
+                      element.message_receiver_name = ""
+                      if (messageLength == 0) {
+                        res[0].message = messageRes
+                        if (data.uidType == 0) {
+                          Promise.all([count, location_info])
+                            .then(() => {
+                              console.log(res)
+                              return callback(null, { 'err_code': 0, 'data': res })
+                            })
+                        } else {
+                          Promise.all([count, plants_info])
+                            .then(() => {
+                              console.log(res)
+                              return callback(null, { 'err_code': 0, 'data': res })
+                            })
+                        }
+                      }
+                    })
+                }
+                else if (element.message_receiver_uid != 'null') {
                   Promise.all([
                     query(`SELECT personal_nickname FROM personal_info
               WHERE personal_uid LIKE '${element.message_sender_uid}%'`)

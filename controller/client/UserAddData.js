@@ -29,6 +29,13 @@ module.exports = function (data, callback) {
       WHERE personal_uid='${data.accountToken.slice(0, 11)}' AND personal_favorite_type=${parseInt(data.uidType)} AND personal_favorite_item_uid='${data.itemUid}'`
     }
   }
+  if (data.type == 'PorLLike') {
+    if(data.itemType == 0) {
+      column = `UPDATE plants_info SET plants_like=plants_like+1 WHERE plants_uid='${data.itemUid}'`
+    } else {
+      column = `UPDATE location_info SET location_like=location_like+1 WHERE location_uid='${data.itemUid}'`
+    }
+  }
   query(column)
     .then(res => {
       callback(null, { 'err_code': 0, 'data': res })
