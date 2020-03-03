@@ -23,7 +23,15 @@ module.exports = function (data, callback) {
     ORDER BY personal_favorite_uid ASC`
   }
   if (data.type == 'getDetailData') {
-    return console.log(data)
+    if (data.uidType == 0) {
+      column = `SELECT plants_name as name,plants_introduction as introduction,plants_picture as picture,plants_distributions_uid,plants_like as itemLike
+      FROM plants_info
+      WHERE plants_uid=${parseInt(data.itemUid)}`
+    } else {
+      column = `SELECT location_name as name,location_introduction as introduction,location_picture as picture,location_like as itemLike
+      FROM location_info
+      WHERE location_uid=${parseInt(data.itemUid)}`
+    }
   }
   query(column)
     .then(res => {
@@ -80,28 +88,128 @@ module.exports = function (data, callback) {
             query(`SELECT plants_name,plants_introduction,plants_picture
             FROM plants_info
             WHERE plants_uid='${element.itemUid}'`)
-            .then(pres => {
-              counter = counter + 1
-              pres = JSON.parse(pres)
-              element.name = pres[0].plants_name
-              element.content = pres[0].plants_introduction
-              element.picture = `${ip}${pres[0].plants_picture}`
-              if (resLength == counter) {callback(null, { 'err_code': 0, 'data': res })}
-            })
+              .then(pres => {
+                counter = counter + 1
+                pres = JSON.parse(pres)
+                element.name = pres[0].plants_name
+                element.content = pres[0].plants_introduction
+                element.picture = `${ip}${pres[0].plants_picture}`
+                if (resLength == counter) { callback(null, { 'err_code': 0, 'data': res }) }
+              })
           } else if (element.type == 1) {
-            query(`SELECT location_name,location_introduction,location_picture
+            query(`SELECT location_name,location_introduction,location_picture,location_like
             FROM location_info
             WHERE location_uid='${element.itemUid}'`)
-            .then(lres => {
-              counter = counter + 1
-              lres = JSON.parse(lres)
-              element.name = lres[0].location_name
-              element.content = lres[0].location_introduction
-              element.picture = `${ip}${lres[0].location_picture}`
-              if (resLength == counter) {callback(null, { 'err_code': 0, 'data': res })}
-            })
+              .then(lres => {
+                counter = counter + 1
+                lres = JSON.parse(lres)
+                element.name = lres[0].location_name
+                element.content = lres[0].location_introduction
+                element.picture = `${ip}${lres[0].location_picture}`
+                if (resLength == counter) { callback(null, { 'err_code': 0, 'data': res }) }
+              })
           }
         })
+      }
+      if (data.type == 'getDetailData') {
+        notGlobalCallback = true
+        // 获取 是否收藏 图片 点赞数
+        let count = query(column = `SELECT COUNT(*) as count
+        FROM personal_favorite_info
+        WHERE personal_uid='${data.accountToken.slice(0, 11)}'
+        AND personal_favorite_type=${data.uidType}
+        AND personal_favorite_item_uid='${data.itemUid}'`)
+          .then(countRes => {
+            countRes = JSON.parse(countRes)
+            if (countRes[0].count == 0) { res[0].isFavorite = 0 } else { res[0].isFavorite = 1 }
+            res[0].picture = `${ip}${res[0].picture}`
+            res[0].like = res[0].itemLike
+          })
+        // 获取 植物分布列表
+        let location_info = query(`SELECT location_uid,location_name,location_introduction,location_picture,location_like
+          FROM location_info
+          WHERE location_uid=${res[0].plants_distributions_uid}`)
+          .then(locationRes => {
+            locationRes = JSON.parse(locationRes)
+            if (locationRes.length > 0) {
+              res[0].location = locationRes
+            }
+          })
+        // 首先进行留言查询
+        let messageLength
+        query(`SELECT message_uid,message_sender_uid,message_receiver_uid,message_date,message_content,message_like
+          FROM message_info
+          WHERE ${data.uidType == 0 ? `message_plants_uid` : `message_location_uid`}='${data.itemUid}'`)
+          .then(messageRes => {
+            messageRes = JSON.parse(messageRes)
+            messageLength = messageRes.length
+            // 有留言进行留言者信息查询
+            if (messageRes.length > 0) {
+              messageRes.forEach(element => {
+                let date = new Date(element.message_date)
+                Y = date.getFullYear() + '-';
+                M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+                D = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate()) + ' ';
+                h = (date.getHours() < 10 ? '0' + (date.getHours()) : date.getHours()) + ':';
+                m = (date.getMinutes() < 10 ? '0' + (date.getMinutes()) : date.getMinutes()) + ':';
+                s = (date.getSeconds() < 10 ? '0' + (date.getSeconds()) : date.getSeconds());
+                date = Y + M + D + h + m + s
+                element.message_date = date
+                if (element.message_sender_uid == 'admin') {
+                  messageLength = messageLength - 1
+                  element.message_sender_uid = '系统通知'
+                } else {
+                  Promise.all([
+                    query(`SELECT personal_nickname FROM personal_info
+              WHERE personal_uid LIKE '${element.message_sender_uid}%'`)
+                      .then(elementRes1 => {
+                        elementRes1 = JSON.parse(elementRes1)
+                        element.message_sender_name = elementRes1[0].personal_nickname
+                      })
+                    ,
+                    query(`SELECT personal_nickname FROM personal_info
+                WHERE personal_uid LIKE '${element.message_receiver_uid}%'`)
+                      .then(elementRes2 => {
+                        elementRes2 = JSON.parse(elementRes2)
+                        element.message_receiver_name = elementRes2[0].personal_nickname
+                      })
+                  ]).then(() => {
+                    messageLength = messageLength - 1
+                    if (messageLength == 0) {
+                      res[0].message = messageRes
+                      if (res[0].plants_distributions_uid != null) {
+                        Promise.all([count, location_info])
+                          .then(() => {
+                            console.log(res)
+                            return callback(null, { 'err_code': 0, 'data': res })
+                          })
+                      } else {
+                        Promise.all([count])
+                          .then(() => {
+                            console.log(res)
+                            return callback(null, { 'err_code': 0, 'data': res })
+                          })
+                      }
+                    }
+                  })
+                }
+              });
+            } else {
+              if (res[0].plants_distributions_uid != null) {
+                Promise.all([count, location_info])
+                  .then(() => {
+                    console.log(res)
+                    return callback(null, { 'err_code': 0, 'data': res })
+                  })
+              } else {
+                Promise.all([count])
+                  .then(() => {
+                    console.log(res)
+                    return callback(null, { 'err_code': 0, 'data': res })
+                  })
+              }
+            }
+          })
       }
 
       if (!notGlobalCallback) {
