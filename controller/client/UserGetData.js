@@ -30,7 +30,7 @@ module.exports = function (data, callback) {
     } else {
       column = `SELECT location_name as name,location_introduction as introduction,location_picture as picture,location_like as itemLike
       FROM location_info
-      WHERE location_uid=${parseInt(data.itemUid)}`
+      WHERE location_uid='${data.itemUid}'`
     }
   }
   query(column)
@@ -125,16 +125,26 @@ module.exports = function (data, callback) {
             res[0].picture = `${ip}${res[0].picture}`
             res[0].like = res[0].itemLike
           })
-        // 获取 植物分布列表
+        // 获取 位置列表
         let location_info = query(`SELECT location_uid,location_name,location_introduction,location_picture,location_like
           FROM location_info
-          WHERE location_uid=${res[0].plants_distributions_uid}`)
+          WHERE location_uid='${res[0].plants_distributions_uid}'`)
           .then(locationRes => {
             locationRes = JSON.parse(locationRes)
             if (locationRes.length > 0) {
               res[0].location = locationRes
             }
           })
+        // 获取 植物列表
+        let plants_info = query(`SELECT plants_uid,plants_name,plants_introduction,plants_picture,plants_like
+        FROM plants_info
+        WHERE plants_distributions_uid='${data.itemUid}'`)
+        .then(plantsRes => {
+          plantsRes = JSON.parse(plantsRes)
+          if (plantsRes.length > 0) {
+            res[0].plants = plantsRes
+          }
+        })
         // 首先进行留言查询
         let messageLength
         query(`SELECT message_uid,message_sender_uid,message_receiver_uid,message_date,message_content,message_like
@@ -177,14 +187,14 @@ module.exports = function (data, callback) {
                     messageLength = messageLength - 1
                     if (messageLength == 0) {
                       res[0].message = messageRes
-                      if (res[0].plants_distributions_uid != null) {
+                      if (data.uidType == 0) {
                         Promise.all([count, location_info])
                           .then(() => {
                             console.log(res)
                             return callback(null, { 'err_code': 0, 'data': res })
                           })
                       } else {
-                        Promise.all([count])
+                        Promise.all([count, plants_info])
                           .then(() => {
                             console.log(res)
                             return callback(null, { 'err_code': 0, 'data': res })
@@ -195,14 +205,14 @@ module.exports = function (data, callback) {
                 }
               });
             } else {
-              if (res[0].plants_distributions_uid != null) {
+              if (data.uidType == 0) {
                 Promise.all([count, location_info])
                   .then(() => {
                     console.log(res)
                     return callback(null, { 'err_code': 0, 'data': res })
                   })
               } else {
-                Promise.all([count])
+                Promise.all([count, plants_info])
                   .then(() => {
                     console.log(res)
                     return callback(null, { 'err_code': 0, 'data': res })
