@@ -264,14 +264,18 @@ module.exports = function (data, callback) {
               WHERE personal_uid LIKE '${element.message_sender_uid}%'`)
                       .then(elementRes1 => {
                         elementRes1 = JSON.parse(elementRes1)
-                        element.message_sender_name = elementRes1[0].personal_nickname
+                        if(elementRes1.length != 0){
+                          element.message_sender_name = elementRes1[0].personal_nickname
+                        }
                       })
                     ,
                     query(`SELECT personal_nickname FROM personal_info
                 WHERE personal_uid LIKE '${element.message_receiver_uid}%'`)
                       .then(elementRes2 => {
                         elementRes2 = JSON.parse(elementRes2)
-                        element.message_receiver_name = elementRes2[0].personal_nickname
+                        if(elementRes2.length != 0){
+                         element.message_receiver_name = elementRes2[0].personal_nickname
+                        }
                       })
                   ]).then(() => {
                     messageLength = messageLength - 1
