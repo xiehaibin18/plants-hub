@@ -20,7 +20,31 @@ module.exports = function (data, callback) {
     plants_info p,location_info l
     WHERE
     l.location_name='${data.search}' AND p.plants_distributions_uid=l.location_uid`
-  } 
+  }
+  if (data.type == 'searchLocationPlants') {
+    if (data.search.slice(0, 3) == '#植物') {
+      column = `SELECT
+      plants_uid,plants_name,plants_introduction,plants_picture,plants_distributions_uid,plants_like
+      FROM
+      plants_info
+      WHERE
+      plants_name LIKE '%${data.search.slice(4)}%'`
+    } else if (data.search.slice(0, 3) == '#位置') {
+      column = `SELECT
+      location_uid as plants_uid,location_name as plants_name,location_introduction as plants_introduction,location_picture as plants_picture,location_plants_uid as plants_distributions_uid,location_like as plants_like
+      FROM
+      location_info
+      WHERE
+      location_name LIKE '%${data.search.slice(4)}%'`
+    } else {
+      column = `SELECT
+      plants_uid,plants_name,plants_introduction,plants_picture,plants_distributions_uid,plants_like
+      FROM
+      plants_info
+      WHERE
+      plants_name LIKE '%${data.search}%'`
+    }
+  }
   if (data.type == 'getUserInfo') {
     column = `SELECT personal_nickname,personal_avatar FROM personal_info WHERE account_token='${data.accountToken}'`
   }
@@ -72,6 +96,21 @@ module.exports = function (data, callback) {
         res.forEach(element => {
           element.type = 0
         })
+      }
+      if (data.type == 'searchLocationPlants') {
+        if (data.search.slice(0, 3) == '#植物') {
+          res.forEach(element => {
+            element.type = 0
+          })
+        } else if (data.search.slice(0, 3) == '#位置') {
+          res.forEach(element => {
+            element.type = 1
+          })
+        } else {
+          res.forEach(element => {
+            element.type = 0
+          })
+        }
       }
       if (data.type == 'getUserMessage') {
         res.forEach(element => {
