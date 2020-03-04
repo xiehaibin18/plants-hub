@@ -7,6 +7,20 @@ module.exports = function (data, callback) {
     // column = `SELECT  FROM plants_info p,location_info l WHERE p.plants_distributions_uid = l.location_uid`
     column = `SELECT plants_uid,plants_name,plants_introduction,plants_picture,plants_distributions_uid,plants_like FROM plants_info`
   }
+  if (data.type == 'allLocation') {
+    column = `SELECT
+    location_uid as plants_uid,location_name as plants_name,location_introduction as plants_introduction,location_picture as plants_picture,location_plants_uid as plants_distributions_uid,location_like as plants_like
+    FROM
+    location_info`
+  }
+  if (data.type == 'myLocationPlants') {
+    column = `SELECT
+    p.plants_uid,p.plants_name,p.plants_introduction,p.plants_picture,p.plants_distributions_uid,p.plants_like
+    FROM
+    plants_info p,location_info l
+    WHERE
+    l.location_name='${data.search}' AND p.plants_distributions_uid=l.location_uid`
+  } 
   if (data.type == 'getUserInfo') {
     column = `SELECT personal_nickname,personal_avatar FROM personal_info WHERE account_token='${data.accountToken}'`
   }
@@ -46,13 +60,18 @@ module.exports = function (data, callback) {
       let notGlobalCallback = false
       if (data.type == 'allPlants') {
         res.forEach(element => {
-          element.plants_picture = `${ip}${element.plants_picture}`
-        });
+          element.type = 0
+        })
       }
-      if (data.type == 'getUserInfo') {
+      if (data.type == 'allLocation') {
         res.forEach(element => {
-          element.personal_avatar = `${ip}${element.personal_avatar}`
-        });
+          element.type = 1
+        })
+      }
+      if (data.type == 'myLocationPlants') {
+        res.forEach(element => {
+          element.type = 0
+        })
       }
       if (data.type == 'getUserMessage') {
         res.forEach(element => {
@@ -68,7 +87,7 @@ module.exports = function (data, callback) {
           if (element.name == 'admin') {
             resLength = resLength - 1
             element.name = '系统通知'
-            element.avatar = `${ip}/public/avatar/admin.png`
+            element.avatar = `/public/avatar/admin.png`
           } else {
             notGlobalCallback = true
             element.senderUid = element.name
@@ -78,7 +97,7 @@ module.exports = function (data, callback) {
                 counter = counter + 1
                 elementRes = JSON.parse(elementRes)
                 element.name = elementRes[0].personal_nickname
-                element.avatar = `${ip}${elementRes[0].personal_avatar}`
+                element.avatar = elementRes[0].personal_avatar
                 if (counter == resLength) {
                   return callback(null, { 'err_code': 0, 'data': res })
                 }
@@ -98,7 +117,7 @@ module.exports = function (data, callback) {
                 pres = JSON.parse(pres)
                 element.name = pres[0].plants_name
                 element.content = pres[0].plants_introduction
-                element.picture = `${ip}${pres[0].plants_picture}`
+                element.picture = pres[0].plants_picture
                 if (resLength == counter) { callback(null, { 'err_code': 0, 'data': res }) }
               })
           } else if (element.type == 1) {
@@ -110,7 +129,7 @@ module.exports = function (data, callback) {
                 lres = JSON.parse(lres)
                 element.name = lres[0].location_name
                 element.content = lres[0].location_introduction
-                element.picture = `${ip}${lres[0].location_picture}`
+                element.picture = lres[0].location_picture
                 if (resLength == counter) { callback(null, { 'err_code': 0, 'data': res }) }
               })
           }
@@ -256,37 +275,41 @@ module.exports = function (data, callback) {
       if (data.type == 'homeHot') {
         notGlobalCallback = true
         res.forEach(element => {
-          element.plants_picture = `${ip}${element.plants_picture}`
+          element.type = 0
         });
         query(`SELECT location_uid as plants_uid,location_name as plants_name,location_introduction as plants_introduction,location_picture as plants_picture,location_like as plants_like
         FROM location_info
         ORDER BY location_like DESC`)
-        .then(hotRes => {
-          hotRes = JSON.parse(hotRes)
-          // res前5 
-          resOut = res.splice(5)
-          // hotRes前5 
-          hotResOut = hotRes.splice(5)
-          // 去除部分合并
-          resOut.concat(hotResOut)
-          // 去除部分打乱
-          resOut.sort((a, b) => {
-            return Math.random() > .5 ? -1 : 1
+          .then(hotRes => {
+            hotRes = JSON.parse(hotRes)
+            hotRes.forEach(element => {
+              element.type = 1
+            });
+            // res前5 
+            resOut = res.splice(5)
+            // hotRes前5 
+            hotResOut = hotRes.splice(5)
+            // 去除部分合并
+            resOut.concat(hotResOut)
+            // 去除部分打乱
+            resOut.sort((a, b) => {
+              return Math.random() > .5 ? -1 : 1
+            })
+            // 去除部分前5 
+            resOut = resOut.splice(5)
+            // 最终合并
+            res = res.concat(hotRes)
+            res = res.concat(resOut)
+            // 最终打乱
+            res.sort((a, b) => {
+              return Math.random() > .5 ? -1 : 1
+            })
+            return callback(null, { 'err_code': 0, 'data': res })
           })
-          // 去除部分前5 
-          resOut = resOut.splice(5)
-          // 最终合并
-          res = res.concat(hotRes)
-          res = res.concat(resOut)
-          // 最终打乱
-          res.sort((a, b) => {
-            return Math.random() > .5 ? -1 : 1
-          })
-          return callback(null, { 'err_code': 0, 'data': res })
-        })
       }
 
       if (!notGlobalCallback) {
+        console.log(res)
         callback(null, { 'err_code': 0, 'data': res })
       }
     })
