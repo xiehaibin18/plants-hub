@@ -30,9 +30,10 @@ module.exports = function (data, callback) {
       let VALUES = `'${UID}','${data.account}','${data.password}','${data.nickname}'`
       query(`INSERT INTO personal_info(${column_name}) VALUES (${VALUES})`)
         .then(() => {
-          let account_token = new Date().getTime() + 259200000;
-          query(`UPDATE personal_info SET account_token="${data.account}-${account_token}" WHERE personal_account="${data.account}" AND personal_password="${data.password}"`)
-          callback(null, { 'err_code': 0, 'account_token': `${data.account}-${account_token}` })
+          let lots = new Date().getTime() + 259200000;
+          let phone = JSON.parse(res)[0].personal_uid.slice(0,11)
+          query(`UPDATE personal_info SET account_token="${phone}-${lots}" WHERE personal_account="${data.account}" AND personal_password="${data.password}"`)
+          callback(null, { 'err_code': 0, 'account_token': `${phone}-${lots}` })
         })
         .catch(err => {
           callback(err, null)
