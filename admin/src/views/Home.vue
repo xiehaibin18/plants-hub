@@ -47,6 +47,8 @@
     <el-button class="btn" round @click="clickAddBtn">添加</el-button>
     <!-- 识图补全 -->
     <el-button class="btn" round @click="clickUseWebAddBtn(0)" v-show="tableName == 'plants_info'">识图补全</el-button>
+    <!-- 批量导入 -->
+    <el-button class="btn" round @click="clickAddJsonBtn(0)" v-show="tableName == 'plants_info'">批量导入</el-button>
     <!-- 数据表格 -->
     <el-table
       :data="tableData"
@@ -298,7 +300,7 @@
         label-width="150px"
         :model="dialogData.plants_info_update"
         ref="plants_info_update"
-        v-if="tableName === 'plants_info' && dialogType !== 0 && dialogType !== 3"
+        v-if="tableName === 'plants_info' && dialogType !== 0 && dialogType !== 3 && dialogType !== 4"
       >
         <el-form-item class="dialog-form-item mgt50" label="(只读)UID：">
           <el-input
@@ -677,6 +679,27 @@
           >识别</el-button>
         </el-form-item>
       </el-form>
+
+      <!-- 批量导入 -->
+      <el-form
+        label-position="right"
+        label-width="100px"
+        v-if="tableName === 'plants_info' && dialogType === 4"
+      >
+      
+        <el-form-item class="dialog-form-item" label="Json数据集：">
+          <ph-uploadimage :limit="1" :accept="'.json'" :tip="'上传.json格式'" @getImageDate="getImageDate"></ph-uploadimage>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button
+            class="btn"
+            round
+            @click="clickAddJsonBtn(1)"
+            :loading="isLoading.submit"
+          >上传</el-button>
+        </el-form-item>
+      </el-form>
     </el-dialog>
   </div>
 </template>
@@ -712,7 +735,7 @@ export default {
       currentPage: 1, // 当前页数
       // ------弹出框------
       dialogVisible: false, // 弹出框 显示状态
-      dialogType: 0, // 弹出框显示内容类型; 0添加 1查看 2更新 3识图补全
+      dialogType: 0, // 弹出框显示内容类型; 0添加 1查看 2更新 3识图补全 4批量导入
       dialogTitle: "关闭重试", // 弹出框 标题
       dialogData: {
         // 添加个人详情
@@ -731,7 +754,8 @@ export default {
           tableName: "plants_info",
           plants_name: "",
           plants_picture: "",
-          plants_distributions_uid: ""
+          plants_distributions_uid: "",
+          plants_json: ""
         },
         plants_info_beforUpdate: {}, // 植物详情修改前备份数据
         plants_info_update: {}, // 植物详情修改后数据
@@ -1042,6 +1066,8 @@ export default {
         self.dialogData.location_info_update.location_picture = val;
       } else if (self.tableName == "plants_info" && self.dialogType === 3) {
         self.dialogData.plants_info.plants_picture = val;
+      } else if (self.tableName == "plants_info" && self.dialogType === 4) {
+        self.dialogData.plants_info.plants_json = val;
       }
     },
     // 提交数据
@@ -1379,6 +1405,59 @@ export default {
                 self.$message({
                   type: "success",
                   message: "识别成功!"
+                });
+              }
+              if (res.data.code == 1) {
+                self.$message({
+                  type: "warning",
+                  message: res.data.err
+                });
+              }
+            })
+            .catch(() => {
+              self.isLoading.submit = false;
+              self.dialogVisible = false;
+              self.getTableDate();
+              self.$message({
+                message: `服务器出错,请刷新页面重试`,
+                type: "warning"
+              });
+            });
+        }
+      }
+    },
+    // 批量导入
+    clickAddJsonBtn(val) {
+      let self = this
+      if (val === 0) {
+        self.dialogType = 4
+        self.dialogVisible = true;
+        self.dialogTitle = "批量导入";
+      }
+      else if (val === 1) {
+        if (!self.dialogData.plants_info.plants_json) {
+          self.$message({
+            message: `请上传Json文件`,
+            type: "warning"
+          });
+        }
+        else{
+          self.isLoading.submit = true
+          axios({
+            url: api.adminAddJson,
+            method: "post",
+            data: {
+              json: self.dialogData.plants_info.plants_json
+            }
+          })
+            .then(res => {
+              self.isLoading.submit = false;
+              self.dialogVisible = false;
+              self.getTableDate();
+              if (res.data.code == 0) {
+                self.$message({
+                  type: "success",
+                  message: "添加成功!"
                 });
               }
               if (res.data.code == 1) {

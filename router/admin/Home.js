@@ -7,6 +7,7 @@ const delTableData = require('../../controller/admin/delTableData')
 const addTableData = require('../../controller/admin/addTableData')
 const updataTableData = require('../../controller/admin/updataTableData')
 const getLocationData = require('../../controller/admin/getLocationData')
+const adminAddJson = require('../../controller/admin/adminAddJson')
 
 const router = express.Router()
 
@@ -102,6 +103,19 @@ router
   .post('/api/adminSignout', (req, res) => {
     req.session.isLogin = false
     res.status(200).json({ 'message': 'Signout success' })
+  })
+  .post('/api/adminAddJson', (req, res) => {
+    /** 图片识别
+    * @param {string} body 数据
+    * @param {function} 回调函数
+    */
+    adminAddJson(req.body, (data, err) => {
+      if (data) {
+        res.status(200).json({ code: 0, data })
+      } else {
+        res.status(200).json({ code: 1, err })
+      }
+    })
   })
 
 module.exports = router

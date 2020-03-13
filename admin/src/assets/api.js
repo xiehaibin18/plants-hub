@@ -11,4 +11,5 @@ export default {
   adminGetLocationData: `${ip}/api/adminGetLocationData`,
   adminSignout: `${ip}/api/adminSignout`,
   pictureRecognition: `${ip}/api/pictureRecognition`,
+  adminAddJson: `${ip}/api/adminAddJson`,
 }

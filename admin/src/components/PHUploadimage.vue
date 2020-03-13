@@ -2,7 +2,7 @@
   <div class="ph-uploadimage">
     <el-upload
       class="upload-image"
-      accept="image/jpeg, image/png"
+      :accept="accept"
       action
       :file-list="fileList"
       list-type="picture-card"
@@ -23,7 +23,7 @@
           </span>
         </span>
       </div>
-      <div slot="tip" class="el-upload__tip" style="line-height: 20px;">只能上传jpg/png文件</div>
+      <div slot="tip" class="el-upload__tip" style="line-height: 20px;">{{ tip }}</div>
     </el-upload>
     <!-- <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button> -->
     <el-dialog :visible.sync="dialogVisible">
@@ -95,6 +95,16 @@ export default {
     limit: {
       type: Number,
       default: 1
+    },
+    // 图片上传张格式
+    accept: {
+      type: String,
+      default: "image/jpeg, image/png"
+    },
+    // tip
+    tip: {
+      type: String,
+      default: "只能上传jpg/png文件"
     },
   }
 };
